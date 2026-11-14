@@ -3,10 +3,16 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>nubachyo — визитка</title>
-  <meta name="description" content="Страница-визитка nubachyo">
+  <title>Владимир Гулаков — архитектор-продуктолог в девелопменте</title>
+  <meta name="description" content="Владимир Гулаков — архитектор-продуктолог в девелопменте">
+  <meta property="og:type" content="profile">
+  <meta property="og:title" content="Владимир Гулаков — архитектор-продуктолог в девелопменте">
+  <meta property="og:description" content="Владимир Гулаков — архитектор-продуктолог в девелопменте">
+  <meta property="og:image" content="https://avatars.githubusercontent.com/u/356517749?s=240">
+  <meta property="og:url" content="https://business-card-two-flax.vercel.app">
+  <meta property="og:locale" content="ru_RU">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #f4f1ec;
@@ -14,6 +20,7 @@
       --text: #1d1d1f;
       --muted: #6b6b70;
       --accent: #e8590c;
+      --accent-soft: #fdf0e7;
       --border: #e6e1d8;
     }
     @media (prefers-color-scheme: dark) {
@@ -23,12 +30,14 @@
         --text: #f2f2f3;
         --muted: #9a9aa2;
         --accent: #ff8a3d;
+        --accent-soft: #2a211b;
         --border: #2c2c31;
       }
     }
-    * { box-sizing: border-box; margin: 0; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       min-height: 100vh;
+      min-height: 100dvh;
       display: grid;
       place-items: center;
       padding: 24px 16px;
@@ -36,62 +45,146 @@
       color: var(--text);
       font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
       line-height: 1.5;
+      overflow-x: hidden;
     }
     .card {
       width: 100%;
-      max-width: 440px;
+      max-width: 520px;
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 40px 32px;
+      border-radius: 24px;
+      padding: 32px 28px;
       text-align: center;
       box-shadow: 0 20px 50px -25px rgba(0, 0, 0, .25);
     }
     .avatar {
-      width: 96px; height: 96px;
-      margin: 0 auto 20px;
+      width: 120px; height: 120px;
+      margin: 0 auto 16px;
       border-radius: 50%;
-      display: grid; place-items: center;
+      overflow: hidden;
       background: var(--accent);
-      color: #fff;
-      font-size: 40px; font-weight: 800;
     }
-    h1 { font-size: 28px; font-weight: 800; letter-spacing: -.02em; }
-    .role { color: var(--accent); font-weight: 600; margin-top: 4px; }
-    .about { color: var(--muted); margin: 18px 0 28px; }
-    .links { display: flex; flex-direction: column; gap: 10px; }
-    .links a {
+    .avatar img {
       display: block;
-      padding: 12px 16px;
+      width: 100%; height: 100%;
+      object-fit: cover;
+    }
+    .initials {
+      width: 100%; height: 100%;
+      display: none;
+      place-items: center;
+      color: #fff;
+      font-size: 44px; font-weight: 800;
+      letter-spacing: .02em;
+    }
+    .avatar.fallback img { display: none; }
+    .avatar.fallback .initials { display: grid; }
+    h1 { font-size: 30px; font-weight: 800; letter-spacing: -.02em; line-height: 1.2; }
+    .role {
+      margin-top: 6px;
+      font-size: 19px; font-weight: 600; line-height: 1.35;
+      color: var(--accent);
+    }
+    .role .city { color: var(--muted); font-weight: 500; white-space: nowrap; }
+    .about { margin: 14px 0 20px; color: var(--muted); font-size: 15px; }
+    .areas {
+      list-style: none;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+    .areas li {
+      padding: 12px 10px;
+      border-radius: 12px;
+      background: var(--accent-soft);
+      border: 1px solid var(--border);
+      font-size: 14px; font-weight: 600; line-height: 1.3;
+      display: grid; place-items: center;
+    }
+    .exp { margin-top: 18px; font-size: 15px; }
+    .tools { margin-top: 4px; font-size: 13px; color: var(--muted); }
+    .contacts {
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+    .contacts a {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      min-width: 0;
+      padding: 12px 10px;
       border: 1px solid var(--border);
       border-radius: 12px;
       color: var(--text);
       text-decoration: none;
-      font-weight: 600;
+      font-size: 14px; font-weight: 600;
       transition: border-color .15s, color .15s, transform .15s;
     }
-    .links a:hover, .links a:focus-visible {
+    .contacts a span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .contacts svg { flex: none; width: 18px; height: 18px; }
+    .contacts a:hover, .contacts a:focus-visible {
       border-color: var(--accent);
       color: var(--accent);
       transform: translateY(-1px);
       outline: none;
     }
-    footer { margin-top: 28px; font-size: 13px; color: var(--muted); }
+    @media (max-width: 440px) {
+      .card { padding: 28px 18px; }
+      h1 { font-size: 26px; }
+      .role { font-size: 17px; }
+      .contacts { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
   <main class="card">
-    <div class="avatar" aria-hidden="true">N</div>
-    <h1>nubachyo</h1>
-    <p class="role">Разработчик</p>
-    <p class="about">Привет! Здесь пара слов о себе: чем занимаюсь, что люблю делать и как со мной связаться.</p>
-    <nav class="links">
-      <a href="https://github.com/nubachyo" target="_blank" rel="noopener">GitHub</a>
-      <a href="https://t.me/" target="_blank" rel="noopener">Telegram</a>
-      <a href="mailto:hello@example.com">Написать на почту</a>
+    <div class="avatar" id="avatar">
+      <img id="avatar-img"
+           src="https://unavatar.io/telegram/dzhetzki?fallback=false"
+           alt="Владимир Гулаков" width="120" height="120">
+      <div class="initials" aria-hidden="true">ВГ</div>
+    </div>
+
+    <h1>Владимир Гулаков</h1>
+    <p class="role">Архитектор-продуктолог в девелопменте <span class="city">· Екатеринбург</span></p>
+
+    <p class="about">Формирую жилой продукт, который хорошо продаётся и удобен в жизни: от анализа рынка и УТП до квартирографии и стандартов продукта для девелопера.</p>
+
+    <ul class="areas" aria-label="Направления">
+      <li>Аналитика рынка и конкурентов</li>
+      <li>Концепция и УТП проекта</li>
+      <li>Эскизные проекты и квартирография</li>
+      <li>Стандартизация продукта</li>
+    </ul>
+
+    <p class="exp">Более 4 лет в архитектуре и продуктовом проектировании жилых комплексов.</p>
+    <p class="tools">Revit · AutoCAD · Figma · Excel · Claude Code</p>
+
+    <nav class="contacts" aria-label="Контакты">
+      <a href="https://t.me/dzhetzki" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.94 4.3a1.2 1.2 0 0 0-1.62-1.3L2.7 9.8c-1.2.47-1.19 1.15-.22 1.45l4.52 1.41 1.74 5.33c.21.59.11.82.73.82.48 0 .69-.22.96-.48l2.3-2.24 4.79 3.54c.88.49 1.52.24 1.74-.82l3.15-14.85-.47.34zM9.6 13.3l8.37-5.28c.4-.24.77-.11.47.16l-7.17 6.47-.28 2.97L9.6 13.3z"/></svg>
+        <span>Telegram @dzhetzki</span>
+      </a>
+      <a href="mailto:gulakov.vs99@gmail.com">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+        <span>gulakov.vs99@gmail.com</span>
+      </a>
     </nav>
-    <footer>© <span id="y"></span> nubachyo</footer>
   </main>
-  <script>document.getElementById('y').textContent = new Date().getFullYear();</script>
+
+  <script>
+    (function () {
+      var img = document.getElementById('avatar-img');
+      var box = document.getElementById('avatar');
+      var sources = ['https://avatars.githubusercontent.com/u/356517749?s=240'];
+      function next() {
+        if (sources.length) { img.src = sources.shift(); }
+        else { img.onerror = null; box.classList.add('fallback'); }
+      }
+      img.onerror = next;
+      // The image may have failed before this script ran.
+      if (img.complete && img.naturalWidth === 0) next();
+    })();
+  </script>
 </body>
 </html>
