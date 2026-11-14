@@ -209,54 +209,9 @@
       border-radius: 20px;
       overflow: hidden;
     }
-    .art .cap {
-      position: absolute;
-      z-index: 1;
-      font-size: 12px;
-      color: var(--muted);
-      letter-spacing: .02em;
-    }
-    .art .cap.tl { top: 18px; left: 20px; color: var(--text); font-weight: var(--fw-medium); }
-    .art .cap.br { bottom: 16px; right: 20px; }
-    .art .cap.bl { bottom: 16px; left: 20px; }
-    .art svg {
-      position: absolute;
-      inset: 44px 24px 40px;
-      width: calc(100% - 48px);
-      height: calc(100% - 84px);
-      overflow: visible;
-    }
+    .art canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 
-    /* Elevation drawing animation */
-    #bld .ln { fill: none; stroke: var(--text); stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw 1s ease-out forwards; }
-    #bld .gx, #bld .gy { transform-box: fill-box; animation: 0.9s cubic-bezier(.3, .7, .2, 1) forwards; }
-    #bld .gx { transform-origin: left center; transform: scaleX(0); animation-name: growX; }
-    #bld .gy { transform-origin: center bottom; transform: scaleY(0); animation-name: growY; }
-    #bld .fd { opacity: 0; animation: fade .6s ease forwards; }
-    #bld .axis { stroke: var(--muted); stroke-width: .6; stroke-opacity: .55; stroke-dasharray: 16 3 2 3; fill: none; }
-    #bld .lvl { stroke: var(--muted); stroke-width: .5; stroke-opacity: .45; stroke-dasharray: 6 4; fill: none; }
-    #bld .dim { stroke: var(--muted); stroke-width: .6; fill: none; }
-    #bld .out { stroke-width: 1.3; }
-    #bld .fl { stroke: var(--text); stroke-width: .6; fill: none; }
-    #bld .sp { stroke: var(--text); stroke-width: .35; stroke-opacity: .55; fill: none; }
-    #bld .mu { stroke: var(--text); stroke-width: .35; stroke-opacity: .6; fill: none; }
-    #bld .fin { stroke: var(--text); stroke-width: .9; fill: none; }
-    #bld .lv { stroke: var(--text); stroke-width: .45; stroke-opacity: .7; fill: none; }
-    #bld .thin { stroke-width: .7; }
-    #bld .ref { stroke: var(--text); stroke-width: .5; stroke-opacity: .3; fill: none; }
-    #bld .glass { fill: var(--face-l); }
-    #bld .solid { fill: var(--face-top); }
-    #bld .ground { stroke: var(--text); stroke-width: 1.8; fill: none; }
-    #bld .hatch { stroke: var(--text); stroke-width: .4; stroke-opacity: .35; fill: none; }
-    #bld .bub { fill: var(--surface); stroke: var(--muted); stroke-width: .7; }
-    #bld .tri { fill: var(--muted); }
-    #bld text { font-family: var(--font); fill: var(--muted); font-size: 7.5px; }
-    #bld text.ax { font-size: 8px; fill: var(--text); text-anchor: middle; dominant-baseline: central; }
-    @keyframes draw { to { stroke-dashoffset: 0; } }
-    @keyframes fade { to { opacity: 1; } }
-    @keyframes growX { to { transform: scaleX(1); } }
-    @keyframes growY { to { transform: scaleY(1); } }
-
+ 
     /* Short desktop screens */
     @media (min-width: 981px) and (max-height: 800px) {
       .page { padding-top: 20px; padding-bottom: 20px; row-gap: 12px; }
@@ -286,11 +241,9 @@
         background: none;
         border: 0;
         border-radius: 0;
-        opacity: .2;
+        opacity: .3;
         pointer-events: none;
       }
-      .art .cap { display: none; }
-      .art svg { inset: 64px 8px 12px; width: calc(100% - 16px); height: calc(100% - 76px); }
     }
     @media (max-width: 480px) {
       .top .loc span + span { display: none; }
@@ -304,9 +257,6 @@
     }
 
     @media (prefers-reduced-motion: reduce) {
-      #bld .ln { stroke-dasharray: none; animation: none; }
-      #bld .gx, #bld .gy { transform: none; animation: none; }
-      #bld .fd { opacity: 1; animation: none; }
     }
   </style>
 </head>
@@ -361,13 +311,11 @@
     </main>
 
     <figure class="art" aria-hidden="true">
-      <span class="cap tl">Жилой комплекс · high-tech</span>
-      <span class="cap bl">Концепция</span>
-      <span class="cap br">Фасад</span>
-      <svg id="bld" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet"></svg>
+  <canvas id="scene"></canvas>
     </figure>
   </div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script>
     // Avatar: Telegram photo -> GitHub photo -> initials.
     (function () {
@@ -382,166 +330,250 @@
       if (img.complete && img.naturalWidth === 0) next();
     })();
 
-    // Facade elevation of a high-tech residential complex, drawn as a construction
-    // sequence: axes -> levels -> ground -> outlines -> floors -> curtain wall -> details.
+    // 3D model of a high-tech residential complex (white architectural model style).
+    // Construction sequence: ground axes -> site -> podium -> towers floor by floor -> roofs, trees.
     (function () {
-      var svg = document.getElementById('bld');
-      var NS = 'http://www.w3.org/2000/svg';
-      var S = 4;                       // px per metre
-      function X(m) { return (m * S).toFixed(1); }
-      function Y(h) { return (-h * S).toFixed(1); }
-      function M(x, h) { return 'M' + X(x) + ' ' + Y(h); }
-      function L(x, h) { return 'L' + X(x) + ' ' + Y(h); }
-      function hl(x1, x2, h) { return M(x1, h) + L(x2, h); }
-      function vl(x, h1, h2) { return M(x, h1) + L(x, h2); }
-      function rect(x1, h1, x2, h2) { return M(x1, h1) + L(x2, h1) + L(x2, h2) + L(x1, h2) + 'Z'; }
-      function el(tag, attrs, parent) {
-        var e = document.createElementNS(NS, tag);
-        for (var k in attrs) e.setAttribute(k, attrs[k]);
-        (parent || svg).appendChild(e);
-        return e;
+      var art = document.querySelector('.art');
+      var canvas = document.getElementById('scene');
+      if (!window.THREE || !canvas) return;
+      var renderer;
+      try {
+        renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+      } catch (e) { art.classList.add('no-webgl'); return; }
+
+      var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      renderer.outputEncoding = THREE.sRGBEncoding;
+
+      var scene = new THREE.Scene();
+      var camera = new THREE.PerspectiveCamera(28, 1, 1, 2000);
+      var target = new THREE.Vector3(0, 50, 0);
+
+      scene.add(new THREE.HemisphereLight(0xffffff, 0xd9d5ca, 0.85));
+      var sun = new THREE.DirectionalLight(0xffffff, 0.75);
+      sun.position.set(-70, 120, 60);
+      sun.castShadow = true;
+      sun.shadow.mapSize.set(2048, 2048);
+      var sc = sun.shadow.camera;
+      sc.left = -90; sc.right = 90; sc.top = 90; sc.bottom = -90; sc.near = 10; sc.far = 400;
+      sun.shadow.bias = -0.0005;
+      scene.add(sun);
+
+      var C = {
+        white: new THREE.MeshStandardMaterial({ color: 0xf5f4ef, roughness: 0.92 }),
+        slab: new THREE.MeshStandardMaterial({ color: 0xf8f7f3, roughness: 0.9 }),
+        glass: new THREE.MeshStandardMaterial({ color: 0xd3d6d6, roughness: 0.35, metalness: 0.05 }),
+        fin: new THREE.MeshStandardMaterial({ color: 0xeceae3, roughness: 0.9 }),
+        band: new THREE.MeshStandardMaterial({ color: 0xbfc0bc, roughness: 0.6 }),
+        line: new THREE.LineBasicMaterial({ color: 0x2c2e31, transparent: true, opacity: 0.5 }),
+        lineSoft: new THREE.LineBasicMaterial({ color: 0x2c2e31, transparent: true, opacity: 0.22 }),
+        axis: new THREE.LineDashedMaterial({ color: 0x63666a, dashSize: 3, gapSize: 1.6, transparent: true, opacity: 0.55 })
+      };
+
+      function edges(mesh, mat, angle) {
+        var l = new THREE.LineSegments(new THREE.EdgesGeometry(mesh.geometry, angle || 25), mat || C.line);
+        mesh.add(l);
+        return mesh;
       }
-      function p(d, cls, delay, dur) {
-        var a = { d: d, 'class': cls, style: 'animation-delay:' + delay.toFixed(2) + 's' + (dur ? ';animation-duration:' + dur + 's' : '') };
-        if (/\bln\b/.test(cls)) a.pathLength = 1;
-        return el('path', a);
-      }
-      function txt(x, h, s, cls, delay, anchor) {
-        var t = el('text', { x: X(x), y: Y(h), 'class': (cls || '') + ' fd', style: 'animation-delay:' + delay.toFixed(2) + 's' });
-        if (anchor) t.setAttribute('text-anchor', anchor);
-        t.textContent = s;
+      function shade(m) { m.castShadow = true; m.receiveShadow = true; return m; }
+      function rounded(w, d, r, h) {
+        var s = new THREE.Shape(), x = -w / 2, y = -d / 2;
+        r = Math.min(r, w / 2 - .01, d / 2 - .01);
+        s.moveTo(x + r, y);
+        s.lineTo(x + w - r, y); s.quadraticCurveTo(x + w, y, x + w, y + r);
+        s.lineTo(x + w, y + d - r); s.quadraticCurveTo(x + w, y + d, x + w - r, y + d);
+        s.lineTo(x + r, y + d); s.quadraticCurveTo(x, y + d, x, y + d - r);
+        s.lineTo(x, y + r); s.quadraticCurveTo(x, y, x + r, y);
+        var g = new THREE.ExtrudeGeometry(s, { depth: h, bevelEnabled: false, curveSegments: 5 });
+        g.rotateX(-Math.PI / 2);
+        return g;
       }
 
-      var FH = 3.3, POD = 7.2;
-      var A = { x1: 6, x2: 30, floors: 26 };          // tall tower
-      var B = { x1: 36, x2: 54, floors: 17 };         // mid tower
-      A.top = POD + A.floors * FH;                    // 93.0
-      B.top = POD + B.floors * FH;                    // 63.3
-      var WING = { x1: 66, x2: 84, levels: [0, 3.6, 6.9, 10.2, 13.5] };
-      var axes = [0, 6, 18, 30, 36, 54, 66, 84];
+      // Things that animate: { obj, t0, dur, kind }
+      var anims = [];
+      function anim(obj, t0, dur, kind) { anims.push({ o: obj, t0: t0, d: dur, k: kind, y: obj.position.y }); }
 
-      // 1. Structural axes with marker bubbles
-      axes.forEach(function (x, i) {
-        var t = .05 + i * .07;
-        p(vl(x, -5.6, 108), 'axis gy', t, 1.1);
-        el('circle', { cx: X(x), cy: Y(-8.2), r: 2.4 * S, 'class': 'bub fd', style: 'animation-delay:' + (t + .5).toFixed(2) + 's' });
-        txt(x, -8.2, String(i + 1), 'ax', t + .6);
+      // ---------- Ground: site slab, roads and structural axes ----------
+      var ground = new THREE.Mesh(new THREE.PlaneGeometry(600, 600), new THREE.ShadowMaterial({ opacity: 0.1 }));
+      ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true;
+      scene.add(ground);
+
+      var site = shade(new THREE.Mesh(rounded(86, 64, 4, .5), C.white));
+      edges(site, C.lineSoft);
+      scene.add(site); anim(site, .5, .8, 'rise');
+
+      var axes = new THREE.Group(); scene.add(axes);
+      var axX = [-36, -24, -12, 0, 12, 24, 36], axZ = [-26, -13, 0, 13, 26];
+      axX.forEach(function (x, i) {
+        var g = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(x, .6, -40), new THREE.Vector3(x, .6, 40)]);
+        var l = new THREE.Line(g, C.axis); l.computeLineDistances(); axes.add(l);
+        var ring = ringAt(x, -44); axes.add(ring);
+        l.scale.z = 0; anim(l, .05 + i * .06, .9, 'growZ'); anim(ring, .5 + i * .06, .4, 'pop');
       });
-
-      // 2. Levels with elevation marks on the left
-      var levels = [[0, '±0.000'], [POD, '+7.200'], [13.5, '+13.500'], [B.top, '+63.300'], [A.top, '+93.000'], [A.top + 6, '+99.000']];
-      levels.forEach(function (lv, i) {
-        var t = .6 + i * .09, h = lv[0];
-        p(hl(-16, 88, h), 'lvl gx', t, 1);
-        p(M(-4, h) + 'l' + (-1.2 * S) + ' ' + (-1.8 * S) + 'h' + (2.4 * S) + 'z', 'tri fd', t + .5);
-        p(hl(-16, -2.6, h), 'dim fd', t + .5);
-        txt(-16, h + .9, lv[1], '', t + .6);
+      axZ.forEach(function (z, i) {
+        var g = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-50, .6, z), new THREE.Vector3(50, .6, z)]);
+        var l = new THREE.Line(g, C.axis); l.computeLineDistances(); axes.add(l);
+        var ring = ringAt(-54, z); axes.add(ring);
+        l.scale.x = 0; anim(l, .2 + i * .06, .9, 'growX'); anim(ring, .65 + i * .06, .4, 'pop');
       });
-
-      // 3. Ground line and soil hatch
-      p(hl(-6, 96, 0), 'ground gx', 1.0, .8);
-      var hatch = '';
-      for (var hx = -5; hx < 96; hx += 2) hatch += M(hx, -.2) + 'l' + (-1.6 * S) + ' ' + (1.6 * S);
-      p(hatch, 'hatch fd', 1.5);
-
-      // 4. Volumes: opaque fills fade in, outlines are drawn
-      function volume(x1, h1, x2, h2, fill, t) {
-        p(rect(x1, h1, x2, h2), fill + ' fd', t + .3, .8);
-        p(rect(x1, h1, x2, h2), 'ln out', t, 1);
+      function ringAt(x, z) {
+        var pts = [];
+        for (var a = 0; a <= 32; a++) pts.push(new THREE.Vector3(Math.cos(a / 32 * Math.PI * 2) * 2.6, 0, Math.sin(a / 32 * Math.PI * 2) * 2.6));
+        var r = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), C.line);
+        r.position.set(x, .6, z);
+        return r;
       }
-      volume(0, 0, 66, POD, 'glass', 1.3);
-      volume(WING.x1, 0, WING.x2, 13.5, 'solid', 1.45);
-      volume(A.x1, POD, A.x2, A.top, 'glass', 1.5);
-      volume(B.x1, POD, B.x2, B.top, 'glass', 1.65);
-      var brH1 = POD + 9 * FH, brH2 = brH1 + 2 * FH;  // sky bridge, floors 10-11
-      volume(A.x2, brH1, B.x1, brH2, 'glass', 1.8);
 
-      // 5. Floors appear bottom-up
-      function floors(x1, x2, base, n, t0, step, skip) {
-        for (var k = 1; k < n; k++) {
-          var h = base + k * FH;
-          if (skip && skip(k)) continue;
-          p(hl(x1, x2, h), 'fl gx', t0 + k * step, .45);
-          p(hl(x1, x2, h - FH + .9), 'sp gx', t0 + k * step + .05, .45); // spandrel line
+      // ---------- Building blocks ----------
+      // A floor = slab (with overhang) + glass volume + optional vertical fins.
+      function floor(o, k, y) {
+        var g = new THREE.Group();
+        g.position.set(o.x, y, o.z);
+        if (o.rot) g.rotation.y = o.rot;
+        var slabH = o.slabH || .45;
+        var slab = shade(new THREE.Mesh(rounded(o.w + o.over * 2, o.d + o.over * 2, o.r + o.over, slabH), o.band && o.band(k) ? C.band : C.slab));
+        edges(slab, C.line);
+        g.add(slab);
+        var gh = o.fh - slabH;
+        var glass = shade(new THREE.Mesh(rounded(o.w - o.inset * 2, o.d - o.inset * 2, Math.max(o.r - o.inset, .3), gh), C.glass));
+        glass.position.y = slabH;
+        edges(glass, C.lineSoft, 30);
+        g.add(glass);
+        if (o.fins) {
+          var fw = .18, fd = o.finDepth || .7, n = 0, pos = [];
+          var hw = o.w / 2 - o.inset + fd / 2 - .05, hd = o.d / 2 - o.inset + fd / 2 - .05;
+          for (var x = -o.w / 2 + o.r + .6; x <= o.w / 2 - o.r - .6; x += o.fins) { pos.push([x, hd, 0]); pos.push([x, -hd, 0]); }
+          for (var z = -o.d / 2 + o.r + .6; z <= o.d / 2 - o.r - .6; z += o.fins) { pos.push([hw, z, 1]); pos.push([-hw, z, 1]); }
+          var inst = new THREE.InstancedMesh(new THREE.BoxGeometry(fw, gh, fd), C.fin, pos.length);
+          var m = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(1, 1, 1);
+          pos.forEach(function (p, i) {
+            q.setFromAxisAngle(new THREE.Vector3(0, 1, 0), p[2] ? Math.PI / 2 : 0);
+            m.compose(new THREE.Vector3(p[2] ? p[0] : p[0], slabH + gh / 2, p[2] ? p[1] : p[1]), q, s);
+            inst.setMatrixAt(i, m);
+          });
+          inst.castShadow = true;
+          g.add(inst);
         }
-        p(hl(x1, x2, base + .9), 'sp gx', t0, .45);
+        scene.add(g);
+        return g;
       }
-      var mech = function (k) { return k === 13; };   // technical floor band at 13-14
-      floors(A.x1, A.x2, POD, A.floors, 2.0, .045, mech);
-      floors(B.x1, B.x2, POD, B.floors, 2.15, .05);
-      WING.levels.slice(1, -1).forEach(function (h, i) { p(hl(WING.x1, WING.x2, h), 'fl gx', 2.0 + i * .1, .45); });
-      p(hl(0, 66, 3.6), 'fl gx', 1.9, .6);
-
-      // 6. Curtain wall: mullions grow up, fins, louvers
-      function mullions(x1, x2, h1, h2, step, finEvery, t) {
-        var mu = '', fin = '';
-        for (var x = x1 + step, i = 1; x < x2 - 1e-6; x += step, i++) {
-          if (finEvery && i % finEvery === 0) fin += vl(x, h1, h2);
-          else mu += vl(x, h1, h2);
+      // Stack floors; segments can shift in plan like stacked boxes.
+      function tower(o, t0, step) {
+        var y = o.base, t = t0;
+        for (var k = 0; k < o.floors; k++) {
+          var seg = o.shift ? o.shift(k) : [0, 0];
+          var f = floor({ x: o.x + seg[0], z: o.z + seg[1], w: o.w, d: o.d, r: o.r, over: o.over, inset: o.inset, fh: o.fh, fins: o.fins, finDepth: o.finDepth, band: o.band, rot: o.rot }, k, y);
+          anim(f, t, .55, 'drop');
+          y += o.fh; t += step;
         }
-        if (mu) p(mu, 'mu gy', t, 1.2);
-        if (fin) p(fin, 'fin gy', t + .15, 1.2);
-      }
-      var mechH1 = POD + 13 * FH, mechH2 = mechH1 + FH;
-      mullions(A.x1, A.x2, POD, mechH1, 1.5, 4, 2.6);
-      mullions(A.x1, A.x2, mechH2, A.top, 1.5, 4, 2.75);
-      var lv = '';
-      for (var lh = mechH1 + .5; lh < mechH2; lh += .5) lv += hl(A.x1, A.x2, lh);
-      p(lv, 'lv gx', 2.9, .7);
-      p(hl(A.x1, A.x2, mechH1) + hl(A.x1, A.x2, mechH2), 'fl gx', 2.85, .6);
-
-      mullions(B.x1, B.x2, POD, B.top, 1.5, 4, 2.7);
-      var sh = '';
-      for (var k2 = 1; k2 <= B.floors; k2++) sh += hl(B.x1 - .7, B.x2 + .7, POD + k2 * FH - .45);
-      p(sh, 'lv gx', 3.0, .8);                         // sun-shading louvers on tower B
-
-      mullions(0, 66, 0, POD, 3, 0, 2.3);               // podium double-height glazing
-      for (var wk = 0; wk < 4; wk++) {                  // wing ribbon windows
-        var h0 = WING.levels[wk], h1 = WING.levels[wk + 1];
-        p(rect(WING.x1 + 1, h0 + .9, WING.x2 - 1, h1 - .6), 'ln mu', 2.4 + wk * .1, .7);
-        mullions(WING.x1 + 1, WING.x2 - 1, h0 + .9, h1 - .6, 2, 0, 2.5 + wk * .1);
+        // roof slab with parapet
+        var seg2 = o.shift ? o.shift(o.floors - 1) : [0, 0];
+        var roof = shade(new THREE.Mesh(rounded(o.w + o.over * 2, o.d + o.over * 2, o.r + o.over, .9), C.slab));
+        roof.position.set(o.x + seg2[0], y, o.z + seg2[1]);
+        if (o.rot) roof.rotation.y = o.rot;
+        edges(roof); scene.add(roof); anim(roof, t, .5, 'drop');
+        return { top: y + .9, end: t + .5, x: o.x + seg2[0], z: o.z + seg2[1] };
       }
 
-      // 7. Details: bridge truss, crown, spire, canopy, reflections
-      var tr = hl(A.x2, B.x1, brH1 + FH) +
-        M(A.x2, brH1) + L(B.x1, brH1 + FH) + M(A.x2, brH1 + FH) + L(B.x1, brH1) +
-        M(A.x2, brH1 + FH) + L(B.x1, brH2) + M(A.x2, brH2) + L(B.x1, brH1 + FH);
-      p(tr, 'ln thin', 3.2, .8);
+      // Podium: three tall glazed levels
+      var pod = tower({ x: -2, z: 2, w: 54, d: 36, r: 3, over: .6, inset: .5, fh: 4.4, floors: 3, base: .5, fins: 2.4, finDepth: .5 }, 1.0, .3);
 
-      var cr = rect(A.x1 + 2, A.top, A.x2 - 2, A.top + 6);
-      for (var cx = A.x1 + 6; cx < A.x2 - 2; cx += 4) cr += vl(cx, A.top, A.top + 6);
-      cr += M(A.x1 + 2, A.top) + L(A.x1 + 6, A.top + 6) + M(A.x2 - 2, A.top) + L(A.x2 - 6, A.top + 6);
-      p(cr, 'ln thin', 3.3, 1);
-      var mid = (A.x1 + A.x2) / 2;
-      p(vl(mid, A.top + 6, A.top + 16) + vl(mid - .4, A.top + 6, A.top + 11) + vl(mid + .4, A.top + 6, A.top + 11), 'ln thin', 3.8, .6);
-      p(rect(B.x1 + 3, B.top, B.x2 - 3, B.top + 2.4), 'ln thin', 3.4, .6); // rooftop plant screen
+      // Main tower: rounded plates, three stacked segments shifted in plan, technical floors as dark bands
+      var T1 = tower({
+        x: -12, z: 6, w: 19, d: 16, r: 3.2, over: 1.0, inset: .9, fh: 3.2, floors: 29, base: pod.top,
+        fins: 1.25, finDepth: .45,
+        shift: function (k) { return k < 10 ? [0, 0] : k < 20 ? [1.4, -1] : [-.6, .9]; },
+        band: function (k) { return k === 10 || k === 20; }
+      }, 1.8, .07);
 
-      p(rect(10, 4.3, 26, 4.8) + M(11, 4.8) + L(14, POD) + M(25, 4.8) + L(22, POD), 'ln thin', 3.1, .8); // canopy
-      p(rect(15, 0, 21, 3.6) + vl(18, 0, 3.6), 'ln thin', 3.2, .6);                                      // entrance doors
-
-      var rf = '';
-      [[A, .22], [A, .62], [B, .4]].forEach(function (r) {
-        var T = r[0], w = T.x2 - T.x1, h = POD + (T.top - POD) * r[1];
-        rf += M(T.x1 + w * .15, h) + L(T.x1 + w * .45, h + 9) + M(T.x1 + w * .3, h) + L(T.x1 + w * .6, h + 9);
+      // Crown on the main tower: open steel frame
+      var crown = new THREE.Group();
+      crown.position.set(T1.x, T1.top, T1.z);
+      var frameMat = C.white, cw = 15, cd = 12, ch = 6;
+      [[-cw / 2, -cd / 2], [cw / 2, -cd / 2], [cw / 2, cd / 2], [-cw / 2, cd / 2]].forEach(function (p) {
+        var c = shade(new THREE.Mesh(new THREE.BoxGeometry(.6, ch, .6), frameMat)); c.position.set(p[0], ch / 2, p[1]); edges(c); crown.add(c);
       });
-      p(rf, 'ln ref', 3.7, .8);
-
-      // Trees on the right for scale
-      var tree = '';
-      [[89, 6], [93.5, 4.6]].forEach(function (t) {
-        tree += vl(t[0], 0, t[1] - 2.2) + M(t[0] + 2.4, t[1]) + 'a' + 2.4 * S + ' ' + 2.4 * S + ' 0 1 0 ' + (-4.8 * S) + ' 0a' + 2.4 * S + ' ' + 2.4 * S + ' 0 1 0 ' + 4.8 * S + ' 0';
+      [[0, -cd / 2, cw, .6], [0, cd / 2, cw, .6]].forEach(function (b) {
+        var m = shade(new THREE.Mesh(new THREE.BoxGeometry(b[2], .6, b[3]), frameMat)); m.position.set(b[0], ch, b[1]); edges(m); crown.add(m);
       });
-      p(tree, 'ln thin', 3.5, .8);
+      [[-cw / 2, 0], [cw / 2, 0]].forEach(function (b) {
+        var m = shade(new THREE.Mesh(new THREE.BoxGeometry(.6, .6, cd), frameMat)); m.position.set(b[0], ch, b[1]); edges(m); crown.add(m);
+      });
+      for (var lx = -cw / 2 + 1.5; lx < cw / 2; lx += 1.5) {
+        var louver = shade(new THREE.Mesh(new THREE.BoxGeometry(.15, .15, cd), frameMat)); louver.position.set(lx, ch, 0); crown.add(louver);
+      }
+      var mast = shade(new THREE.Mesh(new THREE.CylinderGeometry(.25, .4, 12, 8), C.white)); mast.position.set(0, ch + 6, 0); edges(mast, C.line, 40); crown.add(mast);
+      scene.add(crown); anim(crown, T1.end, .7, 'drop');
 
-      // 8. Dimension chain between axes
-      var dm = hl(axes[0] - 1.5, axes[axes.length - 1] + 1.5, -3.6);
-      axes.forEach(function (x) { dm += M(x - .7, -4.3) + L(x + .7, -2.9) + vl(x, -2.6, -4.6); });
-      p(dm, 'dim gx', 3.4, .8);
-      for (var i = 0; i < axes.length - 1; i++) {
-        txt((axes[i] + axes[i + 1]) / 2, -3.0, String((axes[i + 1] - axes[i]) * 1000), '', 3.7, 'middle');
+      // Second tower: sharper plates with deep vertical fins
+      var T2 = tower({
+        x: 12, z: -8, w: 15, d: 12, r: .8, over: .35, inset: .4, fh: 3.2, floors: 18, base: pod.top,
+        fins: .85, finDepth: .9, band: function (k) { return k === 9; }
+      }, 2.1, .08);
+      var plant = shade(new THREE.Mesh(new THREE.BoxGeometry(8, 2.6, 6), C.white));
+      plant.position.set(T2.x - 1, T2.top + 1.3, T2.z); edges(plant); scene.add(plant); anim(plant, T2.end, .5, 'drop');
+
+      // Low-rise wing with horizontal ribbons, slightly rotated (as in the reference model)
+      var W = tower({ x: 21, z: 26.5, w: 26, d: 8, r: 1.5, over: .5, inset: .6, fh: 3.4, floors: 6, base: .5, fins: 1.6, finDepth: .35, rot: -0.35 }, 2.0, .12);
+
+      // Trees around the site
+      var treeGeo = new THREE.IcosahedronGeometry(2, 0), trunkGeo = new THREE.CylinderGeometry(.18, .22, 2.2, 6);
+      [[-40, 26], [-34, 28], [-28, 27], [-20, 28], [-42, -10], [-41, 6], [-40, -24], [-10, -27], [2, -28], [38, -14], [40, -2], [40, 10]].forEach(function (p, i) {
+        var t = new THREE.Group();
+        var crownT = shade(new THREE.Mesh(treeGeo, C.white)); crownT.position.y = 3.6; edges(crownT, C.lineSoft, 10); t.add(crownT);
+        var trunk = shade(new THREE.Mesh(trunkGeo, C.white)); trunk.position.y = 1.6; t.add(trunk);
+        t.position.set(p[0], .5, p[1]);
+        scene.add(t); anim(t, 2.6 + i * .05, .5, 'pop');
+      });
+
+      // ---------- Camera, resize, animation ----------
+      var fitDist = 200;
+      function resize() {
+        var w = art.clientWidth, h = art.clientHeight;
+        if (!w || !h) return;
+        renderer.setSize(w, h, false);
+        camera.aspect = w / h;
+        var tanV = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+        fitDist = Math.max((camera.aspect < 1 ? 88 : 72) / tanV, 64 / (tanV * camera.aspect)) * 1.05;
+        camera.updateProjectionMatrix();
+      }
+      resize();
+      if (window.ResizeObserver) new ResizeObserver(resize).observe(art); else window.addEventListener('resize', resize);
+
+      function ease(x) { return 1 - Math.pow(1 - Math.min(Math.max(x, 0), 1), 3); }
+      function apply(t) {
+        anims.forEach(function (a) {
+          var e = ease((t - a.t0) / a.d), o = a.o;
+          o.visible = e > 0;
+          if (a.k === 'drop') { o.scale.y = Math.max(e, .001); o.position.y = a.y + (1 - e) * 5; }
+          else if (a.k === 'rise') { o.scale.y = Math.max(e, .001); }
+          else if (a.k === 'growX') { o.scale.x = Math.max(e, .001); }
+          else if (a.k === 'growZ') { o.scale.z = Math.max(e, .001); }
+          else if (a.k === 'pop') { var s = Math.max(e, .001); o.scale.set(s, s, s); }
+        });
+      }
+      function place(t) {
+        var az = .75 + (reduce ? 0 : t * .045);
+        var intro = reduce ? 1 : ease(t / 4.5);
+        var dist = fitDist * (1.18 - .18 * intro);
+        var el = THREE.MathUtils.degToRad(20 + 6 * (1 - intro));
+        camera.position.set(target.x + dist * Math.cos(el) * Math.sin(az), target.y + dist * Math.sin(el), target.z + dist * Math.cos(el) * Math.cos(az));
+        camera.lookAt(target);
       }
 
-      svg.setAttribute('viewBox', [-22 * S, -112 * S, 120 * S, 124 * S].join(' '));
+      var start = performance.now();
+      var m = /#t=([0-9.]+)/.exec(location.hash); // preview hook: #t=seconds jumps the timeline
+      if (m) start -= parseFloat(m[1]) * 1000;
+      function frame(now) {
+        var t = reduce ? 99 : (now - start) / 1000;
+        apply(t);
+        place(t);
+        renderer.render(scene, camera);
+        if (!reduce) requestAnimationFrame(frame);
+      }
+      requestAnimationFrame(frame);
     })();
   </script>
 </body>
