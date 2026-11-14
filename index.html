@@ -11,28 +11,38 @@
   <meta property="og:image" content="https://avatars.githubusercontent.com/u/356517749?s=240">
   <meta property="og:url" content="https://gulakov-arch.vercel.app">
   <meta property="og:locale" content="ru_RU">
-  <meta name="theme-color" content="#efe9dc">
-  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-  <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
-  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <meta name="theme-color" content="#F9F8F3">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&subset=cyrillic&display=swap" rel="stylesheet">
+  <!-- Onest is the fallback until Nagel web font files are added to /fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600&subset=cyrillic&display=swap" rel="stylesheet">
   <style>
+    /* Nagel (ParaType, commercial): used when installed locally.
+       To self-host, add url('/fonts/Nagel-*.woff2') format('woff2') to each src. */
+    @font-face { font-family: "Nagel"; font-weight: 400; font-display: swap; src: local("Nagel"), local("Nagel Regular"), local("Nagel-Regular"); }
+    @font-face { font-family: "Nagel"; font-weight: 500; font-display: swap; src: local("Nagel Medium"), local("Nagel-Medium"); }
+    @font-face { font-family: "Nagel"; font-weight: 600; font-display: swap; src: local("Nagel SemiBold"), local("Nagel-SemiBold"), local("Nagel Bold"), local("Nagel-Bold"); }
+
     :root {
       --fw-regular: 400;
       --fw-medium: 500;
       --fw-semibold: 600;
-      --font: "Cormorant Garamond", Garamond, "Times New Roman", serif;
+      --font: "Nagel", "Onest", system-ui, sans-serif;
 
-      --bone: #efe9dc;          /* card stock */
-      --ink: #1c1c1a;
-      --muted: #5f5a50;
-      --hair: rgba(28, 28, 26, .22);
-      --draw: rgb(34, 34, 34);  /* building */
-      --face-top: #f5f1e7;
-      --face-l: #e7e0d0;
-      --face-r: #ddd5c3;
+      /* Slate on Milk */
+      --bg: #F9F8F3;
+      --surface: #F0EFE9;
+      --text: #2C2E31;
+      --muted: #63666A;
+      --hair: #E2E0D8;
+      --accent: #C85A32;
+
+      --face-top: #F7F6F1;
+      --face-l: #EAE8E1;
+      --face-r: #E1DFD7;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -40,298 +50,297 @@
     body {
       min-height: 100vh;
       min-height: 100dvh;
-      background-color: var(--bone);
-      /* faint paper grain */
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .3  0 0 0 0 .27  0 0 0 0 .2  0 0 0 .06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-      color: var(--ink);
+      background: var(--bg);
+      color: var(--text);
       font-family: var(--font);
-      font-weight: var(--fw-medium);
-      line-height: 1.4;
-      font-variant-numeric: lining-nums;
+      font-weight: var(--fw-regular);
+      line-height: 1.45;
       overflow-x: hidden;
     }
     a { color: inherit; text-decoration: none; }
-
-    .sc { /* engraved small-caps line */
-      text-transform: uppercase;
-      letter-spacing: .2em;
-      font-size: 13px;
-      font-weight: var(--fw-semibold);
-    }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
 
     .page {
-      position: relative;
       max-width: 1320px;
       min-height: 100vh;
       min-height: 100dvh;
       margin: 0 auto;
-      padding: 36px 56px 32px;
+      padding: 28px 40px;
       display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-      grid-template-rows: auto 1fr auto;
-      grid-template-areas: "top top" "id art" "foot foot";
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+      grid-template-rows: auto 1fr;
+      grid-template-areas: "top top" "info art";
+      column-gap: 48px;
+      row-gap: 20px;
     }
 
-    /* Top corners, like the phone line on a classic card */
     .top {
       grid-area: top;
       display: flex;
+      align-items: center;
       justify-content: space-between;
-      gap: 24px;
-      position: relative;
-      z-index: 1;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--hair);
+      font-size: 13px;
+      color: var(--muted);
     }
-    .top div { display: flex; flex-direction: column; gap: 4px; }
-    .top .right { text-align: right; }
-    .top a { border-bottom: 1px solid transparent; transition: border-color .15s; }
-    .top a:hover, .top a:focus-visible { border-bottom-color: var(--ink); outline: none; }
-    .top .k { color: var(--muted); margin-right: .6em; }
+    .brand { display: flex; align-items: center; gap: 10px; color: var(--text); font-weight: var(--fw-medium); }
+    .brand img { width: 28px; height: 28px; display: block; }
+    .top .loc { display: flex; gap: 18px; }
 
-    .id {
-      grid-area: id;
-      position: relative;
-      z-index: 1;
+    /* Left column */
+    .info {
+      grid-area: info;
       display: flex;
       flex-direction: column;
-      align-items: center;
       justify-content: center;
-      text-align: center;
-      padding: 28px 0;
+      min-width: 0;
+      padding: 12px 0;
     }
-    .avatar { position: relative; width: 120px; height: 120px; margin-bottom: 26px; }
-    .avatar::after {
-      content: "";
-      position: absolute;
-      inset: -7px;
-      border: 1px solid var(--hair);
-      border-radius: 50%;
-    }
+    .head { display: flex; align-items: center; gap: 24px; }
+    .avatar { position: relative; flex: none; width: 120px; height: 120px; }
     .avatar img, .avatar .initials { width: 120px; height: 120px; border-radius: 50%; }
-    .avatar img {
-      display: block;
-      object-fit: cover;
-      filter: grayscale(1) contrast(1.05);
-      background: var(--face-r);
-    }
+    .avatar img { display: block; object-fit: cover; background: var(--surface); border: 1px solid var(--hair); }
     .initials {
       display: none;
       place-items: center;
-      background: var(--ink);
-      color: var(--bone);
+      background: var(--text);
+      color: var(--bg);
       font-size: 40px;
       font-weight: var(--fw-semibold);
-      letter-spacing: .08em;
     }
     .avatar.fallback img { display: none; }
     .avatar.fallback .initials { display: grid; }
 
-    /* Name: spaced capitals, the first I runs down into the L of GULAKOV */
-    h1 { width: min(100%, 440px); }
-    .name { display: block; width: 100%; height: auto; overflow: visible; }
-    .name text {
-      font-family: var(--font);
+    .eyebrow { font-size: 13px; color: var(--muted); letter-spacing: .04em; margin-bottom: 6px; }
+    h1 {
+      font-size: clamp(40px, 4.4vw, 60px);
       font-weight: var(--fw-semibold);
-      font-size: 40px;
-      fill: var(--ink);
+      line-height: 1;
+      letter-spacing: -.035em;
     }
-    .name .il { fill: var(--ink); }
-    .vh {
-      position: absolute;
-      width: 1px; height: 1px;
-      overflow: hidden;
-      clip: rect(0 0 0 0);
-      white-space: nowrap;
-    }
+    h1 span { display: block; }
 
-    .rule { width: 56px; height: 1px; background: var(--ink); margin: 22px auto 18px; }
-    .role { font-size: 14px; letter-spacing: .26em; }
-    .about {
-      margin-top: 14px;
-      max-width: 30em;
-      font-style: italic;
-      font-weight: var(--fw-regular);
-      font-size: 19px;
-      line-height: 1.35;
-      color: var(--muted);
+    .role {
+      margin-top: 26px;
+      font-size: clamp(20px, 1.9vw, 26px);
+      font-weight: var(--fw-medium);
+      line-height: 1.2;
+      letter-spacing: -.015em;
     }
+    .about { margin-top: 10px; max-width: 36em; font-size: 16px; color: var(--muted); }
+
     .areas {
       list-style: none;
       margin-top: 22px;
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px 28px;
-      max-width: 520px;
-      counter-reset: a;
+      gap: 8px;
+      counter-reset: area;
     }
     .areas li {
-      counter-increment: a;
-      font-size: 12px;
-      letter-spacing: .16em;
-      line-height: 1.5;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 14px 16px;
+      background: var(--surface);
+      border: 1px solid var(--hair);
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: var(--fw-medium);
+      line-height: 1.25;
+      counter-increment: area;
     }
     .areas li::before {
-      content: counter(a, upper-roman) ".";
-      display: block;
-      font-size: 13px;
-      letter-spacing: .1em;
+      content: counter(area, decimal-leading-zero);
+      font-size: 12px;
+      font-weight: var(--fw-regular);
       color: var(--muted);
     }
 
-    /* Exploded axonometric */
+    .facts {
+      margin-top: 22px;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .exp { display: flex; align-items: center; gap: 12px; }
+    .exp b { font-size: 40px; font-weight: var(--fw-semibold); letter-spacing: -.04em; line-height: 1; }
+    .exp span { font-size: 13px; line-height: 1.3; color: var(--muted); max-width: 17em; }
+    .tools { list-style: none; display: flex; flex-wrap: wrap; gap: 6px; }
+    .tools li {
+      padding: 5px 10px;
+      border: 1px solid var(--hair);
+      border-radius: 999px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .cta { margin-top: 24px; display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      height: 48px;
+      padding: 0 20px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: var(--fw-medium);
+      border: 1px solid var(--text);
+      transition: background-color .15s, color .15s, border-color .15s;
+      min-width: 0;
+    }
+    .btn svg { width: 18px; height: 18px; flex: none; }
+    .btn span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .btn.primary { background: var(--text); color: var(--bg); }
+    .btn.primary:hover { background: #3a3d41; }
+    .btn.ghost { border-color: var(--hair); background: transparent; }
+    .btn.ghost:hover { background: var(--surface); border-color: var(--text); }
+
+    /* Right column: drawing card */
     .art {
       grid-area: art;
       position: relative;
       min-width: 0;
+      min-height: 420px;
+      background: var(--surface);
+      border: 1px solid var(--hair);
+      border-radius: 20px;
+      overflow: hidden;
     }
+    .art .cap {
+      position: absolute;
+      z-index: 1;
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: .02em;
+    }
+    .art .cap.tl { top: 18px; left: 20px; color: var(--text); font-weight: var(--fw-medium); }
+    .art .cap.br { bottom: 16px; right: 20px; }
+    .art .cap.bl { bottom: 16px; left: 20px; }
     .art svg {
       position: absolute;
-      inset: 16px 0 8px 0;
-      width: 100%;
-      height: calc(100% - 24px);
+      inset: 44px 24px 40px;
+      width: calc(100% - 48px);
+      height: calc(100% - 84px);
       overflow: visible;
     }
-    .lvl { opacity: 0; animation: drop 1s cubic-bezier(.2, .75, .25, 1) forwards; }
+
     .ln {
       fill: none;
-      stroke: var(--draw);
+      stroke: var(--text);
       stroke-linecap: round;
       stroke-dasharray: 1;
       stroke-dashoffset: 1;
-      animation: draw 1.3s ease-out forwards;
+      animation: draw 1.2s ease-out forwards;
     }
-    .edge { stroke-width: 1.1; }
-    .win { stroke-width: .55; stroke-opacity: .55; }
-    .gnd { stroke-width: .5; stroke-opacity: .2; }
-    .guide {
-      fill: none;
-      stroke: var(--draw);
-      stroke-width: .7;
-      stroke-dasharray: 3 3;
-      stroke-opacity: .6;
-      opacity: 0;
-      animation: fade .6s ease forwards;
-    }
-    .lead { fill: none; stroke: var(--draw); stroke-width: .6; opacity: 0; animation: fade .6s ease forwards; }
-    .tag {
-      font-family: var(--font);
-      font-weight: var(--fw-semibold);
-      font-size: 10px;
-      letter-spacing: .18em;
-      fill: var(--draw);
-      opacity: 0;
-      animation: fade .6s ease forwards;
-    }
+    .gnd { stroke-width: .5; stroke-opacity: .16; }
+    .site { stroke-width: .7; stroke-opacity: .45; }
+    .crown { stroke-width: .8; }
+    .glare { stroke-width: .6; stroke-opacity: .28; }
+    .band { opacity: 0; animation: rise .32s ease-out forwards; }
+    .band .e { fill: none; stroke: var(--text); stroke-width: 1; }
+    .band .m { fill: none; stroke: var(--text); stroke-width: .45; stroke-opacity: .5; }
+    .band .fin { fill: none; stroke: var(--text); stroke-width: 1.1; stroke-opacity: .7; }
     @keyframes draw { to { stroke-dashoffset: 0; } }
-    @keyframes fade { to { opacity: 1; } }
-    @keyframes drop {
-      from { opacity: 0; transform: translateY(-36px); }
-      to { opacity: 1; transform: none; }
+    @keyframes rise { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+
+    /* Short desktop screens */
+    @media (min-width: 981px) and (max-height: 800px) {
+      .page { padding-top: 20px; padding-bottom: 20px; row-gap: 12px; }
+      .top { padding-bottom: 12px; }
+      .avatar, .avatar img, .avatar .initials { width: 104px; height: 104px; }
+      .role { margin-top: 18px; }
+      .areas { margin-top: 16px; }
+      .areas li { padding: 11px 14px; gap: 6px; }
+      .facts { margin-top: 16px; }
+      .cta { margin-top: 16px; }
     }
 
-    .foot {
-      grid-area: foot;
-      position: relative;
-      z-index: 1;
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .foot .tools { color: var(--muted); font-size: 12px; }
-
-    @media (min-width: 861px) and (max-height: 820px) {
-      .page { padding-top: 26px; padding-bottom: 22px; }
-      .id { padding: 10px 0; }
-      .avatar { margin-bottom: 16px; }
-      h1 { width: min(100%, 360px); }
-      .rule { margin: 14px auto 12px; }
-      .about { font-size: 18px; margin-top: 10px; }
-      .areas { margin-top: 14px; gap: 6px 28px; }
-    }
-
-    @media (max-width: 860px) {
+    @media (max-width: 980px) {
       .page {
-        padding: 22px 18px 22px;
+        padding: 20px 16px 24px;
         grid-template-columns: minmax(0, 1fr);
-        grid-template-areas: "top" "id" "foot";
-        overflow: hidden;
+        grid-template-rows: auto auto auto;
+        grid-template-areas: "top" "info" "art";
       }
-      .art {
-        position: absolute;
-        right: 0; top: 90px;
-        width: 70%; height: 520px;
-        opacity: .16;
-        pointer-events: none;
-      }
-      .id { padding: 26px 0 22px; justify-content: flex-start; }
-      .foot { gap: 4px; }
+      .art { min-height: 0; height: 380px; }
     }
     @media (max-width: 480px) {
-      .sc { font-size: 11px; letter-spacing: .14em; }
-      .top { gap: 12px; }
-      .top .k { display: block; margin: 0 0 1px; font-size: 10px; }
-      .avatar { margin-bottom: 20px; }
-      .rule { margin: 16px auto 14px; }
-      .role { font-size: 12px; letter-spacing: .18em; }
-      .about { font-size: 17px; }
-      .areas { gap: 10px 16px; margin-top: 18px; }
-      .areas li { font-size: 11px; letter-spacing: .1em; }
-      .foot .sc { font-size: 10.5px; letter-spacing: .12em; }
+      .top .loc span + span { display: none; }
+      .head { gap: 18px; }
+      h1 { font-size: 36px; }
+      .role { margin-top: 20px; font-size: 20px; }
+      .about { font-size: 15px; }
+      .areas li { font-size: 14px; padding: 12px; }
+      .exp b { font-size: 34px; }
+      .cta .btn { flex: 1 1 100%; justify-content: center; }
+      .art { height: 340px; border-radius: 16px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .lvl { opacity: 1; animation: none; }
       .ln { stroke-dasharray: none; animation: none; }
-      .guide, .lead, .tag { opacity: 1; animation: none; }
+      .band { opacity: 1; animation: none; }
     }
   </style>
 </head>
 <body>
   <div class="page">
-    <header class="top sc">
-      <div>
-        <a href="https://t.me/dzhetzki" target="_blank" rel="noopener"><span class="k">Telegram</span>@dzhetzki</a>
-        <a href="mailto:gulakov.vs99@gmail.com"><span class="k">E-mail</span>gulakov.vs99@gmail.com</a>
-      </div>
-      <div class="right">
-        <span>Екатеринбург</span>
-        <span class="k" style="margin:0">56°50′ N · 60°36′ E</span>
-      </div>
+    <header class="top">
+      <span class="brand"><img src="favicon.svg" alt="" width="28" height="28">Gulakov · Architecture</span>
+      <span class="loc"><span>Екатеринбург</span><span>56°50′ N, 60°36′ E</span></span>
     </header>
 
-    <main class="id">
-      <div class="avatar" id="avatar">
-        <img id="avatar-img"
-             src="https://unavatar.io/telegram/dzhetzki?fallback=false"
-             alt="Владимир Гулаков" width="120" height="120">
-        <div class="initials" aria-hidden="true">VG</div>
+    <main class="info">
+      <div class="head">
+        <div class="avatar" id="avatar">
+          <img id="avatar-img"
+               src="https://unavatar.io/telegram/dzhetzki?fallback=false"
+               alt="Владимир Гулаков" width="120" height="120">
+          <div class="initials" aria-hidden="true">VG</div>
+        </div>
+        <div>
+          <p class="eyebrow">Владимир Гулаков</p>
+          <h1 lang="en"><span>Vladimir</span><span>Gulakov</span></h1>
+        </div>
       </div>
 
-      <h1>
-        <span class="vh" lang="en">Vladimir Gulakov</span>
-        <svg class="name" id="name" viewBox="0 0 324 108" aria-hidden="true"></svg>
-      </h1>
-
-      <div class="rule"></div>
-      <p class="role sc">Архитектор-продуктолог в девелопменте</p>
+      <p class="role">Архитектор-продуктолог в девелопменте</p>
       <p class="about">Формирую жилой продукт, который хорошо продаётся и удобен в жизни: от анализа рынка и УТП до квартирографии и стандартов продукта для девелопера.</p>
 
-      <ol class="areas sc" aria-label="Направления">
+      <ol class="areas" aria-label="Направления">
         <li>Аналитика рынка и конкурентов</li>
         <li>Концепция и УТП проекта</li>
         <li>Эскизные проекты и квартирография</li>
         <li>Стандартизация продукта</li>
       </ol>
+
+      <div class="facts">
+        <div class="exp"><b>4+</b><span>лет в архитектуре и продуктовом проектировании жилых комплексов</span></div>
+        <ul class="tools" aria-label="Инструменты">
+          <li>Revit</li><li>AutoCAD</li><li>Figma</li><li>Excel</li><li>Claude Code</li>
+        </ul>
+      </div>
+
+      <div class="cta">
+        <a class="btn primary" href="https://t.me/dzhetzki" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.94 4.3a1.2 1.2 0 0 0-1.62-1.3L2.7 9.8c-1.2.47-1.19 1.15-.22 1.45l4.52 1.41 1.74 5.33c.21.59.11.82.73.82.48 0 .69-.22.96-.48l2.3-2.24 4.790 3.54c.88.49 1.52.24 1.74-.82l3.15-14.85-.47.34zM9.6 13.3l8.37-5.28c.4-.24.77-.11.47.16l-7.17 6.47-.28 2.97L9.6 13.3z"/></svg>
+          <span>Telegram @dzhetzki</span>
+        </a>
+        <a class="btn ghost" href="mailto:gulakov.vs99@gmail.com">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+          <span>gulakov.vs99@gmail.com</span>
+        </a>
+      </div>
     </main>
 
-    <div class="art" aria-hidden="true">
+    <figure class="art" aria-hidden="true">
+      <span class="cap tl">Жилой комплекс · high-tech</span>
+      <span class="cap bl">Концепция</span>
+      <span class="cap br">Аксонометрия</span>
       <svg id="bld" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet"></svg>
-    </div>
-
-    <footer class="foot">
-      <p class="sc">4+ лет в архитектуре и продуктовом проектировании жилых комплексов</p>
-      <p class="sc tools">Revit · AutoCAD · Figma · Excel · Claude Code</p>
-    </footer>
+    </figure>
   </div>
 
   <script>
@@ -348,150 +357,126 @@
       if (img.complete && img.naturalWidth === 0) next();
     })();
 
-    var NS = 'http://www.w3.org/2000/svg';
-    function el(tag, attrs, parent) {
-      var e = document.createElementNS(NS, tag);
-      for (var k in attrs) e.setAttribute(k, attrs[k]);
-      if (parent) parent.appendChild(e);
-      return e;
-    }
-
-    // Name on a 9-column grid. GULAKOV is shifted two columns right so that
-    // the first I of VLADIMIR sits above the L and becomes one stroke with it.
-    (function () {
-      var svg = document.getElementById('name');
-      var CW = 36, Y1 = 40, Y2 = 100, CAP = 26.5;
-      var rows = [['VLADIMIR', 0, Y1, 4], ['GULAKOV', 2, Y2, 2]];
-      rows.forEach(function (r) {
-        r[0].split('').forEach(function (ch, i) {
-          if (i === r[3]) return; // drawn as the joined I/L stroke
-          var t = el('text', { x: (r[1] + i) * CW + CW / 2, y: r[2], 'text-anchor': 'middle' }, svg);
-          t.textContent = ch;
-        });
-      });
-      var x = 4 * CW + CW / 2, sw = 4.4, top = Y1 - CAP;
-      var g = el('g', { 'class': 'il' }, svg);
-      el('rect', { x: x - 8, y: top, width: 16, height: 1.9 }, g);          // I top serif
-      el('rect', { x: x - sw / 2, y: top, width: sw, height: Y2 - top }, g);  // shared stem
-      el('rect', { x: x - 8, y: Y2 - 2.3, width: 31, height: 2.3 }, g);       // L foot
-      el('path', { d: 'M' + (x + 23) + ' ' + Y2 + 'l0 -9 l-1.8 0 l-1.6 7 z' }, g); // foot serif
-    })();
-
-    // Exploded axonometric: the building assembles level by level.
+    // High-tech residential complex in axonometry. Towers grow floor by floor.
     (function () {
       var svg = document.getElementById('bld');
-      var U = 11, K = Math.cos(Math.PI / 6), GAP = 3.2;
+      var NS = 'http://www.w3.org/2000/svg';
+      var U = 10, K = Math.cos(Math.PI / 6), FH = .9; // floor height in plan units
       var minX = 1e9, minY = 1e9, maxX = -1e9, maxY = -1e9;
+
       function P(x, y, z) {
-        var p = [(x - y) * K * U, (x + y) * 0.5 * U - z * U];
+        var p = [(x - y) * K * U, (x + y) * .5 * U - z * U];
         if (p[0] < minX) minX = p[0]; if (p[0] > maxX) maxX = p[0];
         if (p[1] < minY) minY = p[1]; if (p[1] > maxY) maxY = p[1];
         return p;
       }
       function f(p) { return p[0].toFixed(1) + ' ' + p[1].toFixed(1); }
       function poly(pts) { return 'M' + pts.map(f).join('L') + 'Z'; }
-      function seg(a, b, ext) {
-        ext = ext || 0;
-        var dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy) || 1;
-        dx = dx / l * ext; dy = dy / l * ext;
-        return 'M' + f([a[0] - dx, a[1] - dy]) + 'L' + f([b[0] + dx, b[1] + dy]);
+      function seg(a, b) { return 'M' + f(a) + 'L' + f(b); }
+      function el(tag, attrs, parent) {
+        var e = document.createElementNS(NS, tag);
+        for (var k in attrs) e.setAttribute(k, attrs[k]);
+        (parent || svg).appendChild(e);
+        return e;
       }
-      function lines(parent, d, cls, delay, dur) {
-        if (!d) return;
+      function lines(d, cls, delay, dur, parent) {
         el('path', { d: d, 'class': 'ln ' + cls, pathLength: 1,
           style: 'animation-delay:' + delay + 's;animation-duration:' + dur + 's' }, parent);
       }
 
-      // faint site grid
-      var gnd = '';
-      for (var i = -3; i <= 17; i += 2) gnd += seg(P(i, -3, 0), P(i, 13, 0));
-      for (var j = -3; j <= 13; j += 2) gnd += seg(P(-3, j, 0), P(17, j, 0));
-      lines(svg, gnd, 'gnd', 0, 1);
+      // Site: faint grid, plot outline and paths
+      var g = '';
+      for (var i = -2; i <= 16; i += 2) g += seg(P(i, -2, 0), P(i, 17, 0));
+      for (var j = -2; j <= 17; j += 2) g += seg(P(-2, j, 0), P(16, j, 0));
+      lines(g, 'gnd', 0, 1);
+      lines(poly([P(-1, -1, 0), P(15, -1, 0), P(15, 16, 0), P(-1, 16, 0)]) +
+            seg(P(-1, 10.5, 0), P(15, 10.5, 0)) + seg(P(6, 10.5, 0), P(6, 16, 0)), 'site', .2, 1.2);
 
-      // Levels from the ground up. Floors count as height units.
-      var levels = [
-        { tag: 'ФУНДАМЕНТНАЯ ПЛИТА', boxes: [{ x: -1, y: -1, w: 16, d: 11, h: .6, plain: true }] },
-        { tag: 'СТИЛОБАТ · КОММЕРЦИЯ', boxes: [{ x: 0, y: 0, w: 14, d: 9, h: 2, shop: true }] },
-        { tag: 'ЭТАЖИ 3–9', boxes: [{ x: 1, y: 1, w: 5, d: 7, h: 7 }, { x: 8, y: 1, w: 5, d: 4, h: 7 }] },
-        { tag: 'ЭТАЖИ 10–16', boxes: [{ x: 1, y: 1, w: 5, d: 7, h: 7 }, { x: 8, y: 1, w: 5, d: 4, h: 7 }] },
-        { tag: 'КРОВЛЯ · ТЕХЭТАЖ', boxes: [{ x: 1, y: 1, w: 5, d: 7, h: .8, plain: true }, { x: 8, y: 1, w: 5, d: 4, h: .8, plain: true }, { x: 2.5, y: 3, w: 2, d: 2, h: 1.4, plain: true, onTop: true }] }
-      ];
+      // A box drawn as a stack of floor bands that appear one after another.
+      // b.m: mullion step; b.fin: vertical fins on the left facade
+      function building(b, t0, step) {
+        var x = b.x, y = b.y, w = b.w, d = b.d, n = b.floors, fh = b.fh || FH;
+        for (var k = 0; k < n; k++) {
+          var z0 = b.z + k * fh, z1 = z0 + fh, last = k === n - 1;
+          var G = el('g', { 'class': 'band', style: 'animation-delay:' + (t0 + k * step).toFixed(2) + 's' });
+          var A = P(x, y, z1), B = P(x + w, y, z1), C = P(x + w, y + d, z1), D = P(x, y + d, z1);
+          var B0 = P(x + w, y, z0), C0 = P(x + w, y + d, z0), D0 = P(x, y + d, z0);
+          el('path', { d: poly([B, C, C0, B0]), fill: 'var(--face-r)' }, G);
+          el('path', { d: poly([D, C, C0, D0]), fill: 'var(--face-l)' }, G);
+          if (last) el('path', { d: poly([A, B, C, D]), fill: 'var(--face-top)' }, G);
 
-      var z = 0, prevTop = null, tagX = null;
-      var tags = [];
-      levels.forEach(function (lv, n) {
-        var delay = .2 + n * .55;
-        if (n > 0) z = prevTop + GAP;
-        var base = z;
-
-        // dashed guides from this level's visible bottom corners down to the level below
-        if (n > 0) {
-          var gd = '';
-          lv.boxes.forEach(function (b) {
-            if (b.onTop) return;
-            [[b.x + b.w, b.y], [b.x + b.w, b.y + b.d], [b.x, b.y + b.d]].forEach(function (c) {
-              gd += seg(P(c[0], c[1], base), P(c[0], c[1], prevTop));
-            });
-          });
-          el('path', { d: gd, 'class': 'guide', style: 'animation-delay:' + (delay + .7) + 's' }, svg);
-        }
-
-        var g = el('g', { 'class': 'lvl', style: 'animation-delay:' + delay + 's' }, svg);
-        var top = base;
-        lv.boxes.slice().sort(function (a, b) {
-          return ((a.onTop ? 1 : 0) - (b.onTop ? 1 : 0)) || ((a.x + a.w / 2 + a.y + a.d / 2) - (b.x + b.w / 2 + b.y + b.d / 2));
-        }).forEach(function (b) {
-          var bz = b.onTop ? base + .8 : base, t = bz + b.h;
-          if (t > top) top = t;
-          var x = b.x, y = b.y, w = b.w, d = b.d;
-          var A = P(x, y, t), B = P(x + w, y, t), C = P(x + w, y + d, t), D = P(x, y + d, t);
-          var B0 = P(x + w, y, bz), C0 = P(x + w, y + d, bz), D0 = P(x, y + d, bz);
-          el('path', { d: poly([A, B, C, D]), fill: 'var(--face-top)' }, g);
-          el('path', { d: poly([B, C, C0, B0]), fill: 'var(--face-r)' }, g);
-          el('path', { d: poly([D, C, C0, D0]), fill: 'var(--face-l)' }, g);
-
-          if (!b.plain) {
-            var win = '';
-            var facade = function (len, pt) {
-              var bays = Math.max(1, Math.round(len / (b.shop ? 2 : 1)));
-              var bw = len / bays;
-              for (var k = 0; k < b.h; k++) {
-                var z0 = bz + k + (b.shop ? .15 : .3), z1 = bz + k + (b.shop ? .85 : .78);
-                for (var m = 0; m < bays; m++) {
-                  var s0 = m * bw + bw * .22, s1 = (m + 1) * bw - bw * .22;
-                  win += poly([pt(s0, z0), pt(s1, z0), pt(s1, z1), pt(s0, z1)]);
-                }
-                if (k > 0) win += seg(pt(0, bz + k), pt(len, bz + k));
-              }
-            };
-            facade(d, function (s, zz) { return P(x + w, y + s, zz); });
-            facade(w, function (s, zz) { return P(x + s, y + d, zz); });
-            lines(g, win, 'win', delay + .35, 1.4);
+          var m = '', fin = '';
+          var ms = b.m || .5;
+          for (var s = ms; s < d - 1e-6; s += ms) m += seg(P(x + w, y + s, z0), P(x + w, y + s, z1));
+          var idx = 0;
+          for (var s2 = ms; s2 < w - 1e-6; s2 += ms, idx++) {
+            if (b.fin && idx % 2 === 1) fin += seg(P(x + s2, y + d + .25, z0), P(x + s2, y + d + .25, z1));
+            else m += seg(P(x + s2, y + d, z0), P(x + s2, y + d, z1));
           }
-          var e = seg(A, B, 3) + seg(B, C, 3) + seg(C, D, 3) + seg(D, A, 3) +
-                  seg(B, B0, 3) + seg(C, C0, 3) + seg(D, D0, 3) + seg(B0, C0, 3) + seg(C0, D0, 3);
-          lines(g, e, 'edge', delay + .1, 1);
+          m += seg(B0, C0) + seg(C0, D0);
+          el('path', { d: m, 'class': 'm' }, G);
+          if (fin) el('path', { d: fin, 'class': 'fin' }, G);
+
+          var e = seg(B, B0) + seg(C, C0) + seg(D, D0);
+          if (k === 0) e += seg(B0, C0) + seg(C0, D0);
+          if (last) e += seg(A, B) + seg(B, C) + seg(C, D) + seg(D, A);
+          el('path', { d: e, 'class': 'e' }, G);
+        }
+        return t0 + n * step;
+      }
+
+      // Open steel crown on top of a tower: frame lines only
+      function crown(x, y, z, w, d, h, delay) {
+        var c = [[x, y], [x + w, y], [x + w, y + d], [x, y + d]];
+        var dd = '';
+        c.forEach(function (p, i) {
+          var q = c[(i + 1) % 4];
+          dd += seg(P(p[0], p[1], z + h), P(q[0], q[1], z + h));
+          dd += seg(P(p[0], p[1], z), P(p[0], p[1], z + h));
         });
+        for (var s = 1; s < d; s += 1) dd += seg(P(x + w, y + s, z), P(x + w, y + s, z + h));
+        for (var s2 = 1; s2 < w; s2 += 1) dd += seg(P(x + s2, y + d, z), P(x + s2, y + d, z + h));
+        lines(dd, 'crown', delay, .9);
+      }
 
-        // callout from the level's front-right corner
-        var right = lv.boxes.reduce(function (m, b) { return (b.x + b.w > m.x + m.w) ? b : m; }, lv.boxes[0]);
-        var anchor = P(right.x + right.w, right.y + right.d * .5, (base + top) / 2);
-        tags.push({ a: anchor, text: lv.tag, delay: delay + .9 });
-        prevTop = top;
-      });
+      // Diagonal reflections on the glass facade
+      function glare(x, y, z, w, d, h, delay) {
+        var dd = '';
+        [.25, .55].forEach(function (r) {
+          var zz = z + h * r;
+          dd += seg(P(x + w, y + d * .15, zz + h * .18), P(x + w, y + d * .65, zz - h * .02));
+          dd += seg(P(x + w, y + d * .25, zz + h * .2), P(x + w, y + d * .75, zz));
+        });
+        lines(dd, 'glare', delay, .8);
+      }
 
-      // align callout labels in one column to the right
-      var colX = maxX + 26;
-      tags.forEach(function (t) {
-        el('path', { d: 'M' + f(t.a) + 'L' + (colX - 6).toFixed(1) + ' ' + t.a[1].toFixed(1) +
-          'M' + f([t.a[0] - 2, t.a[1]]) + 'a2 2 0 1 0 4 0a2 2 0 1 0 -4 0', 'class': 'lead',
-          style: 'animation-delay:' + t.delay + 's' }, svg);
-        var tx = el('text', { x: colX, y: t.a[1] + 3.5, 'class': 'tag', style: 'animation-delay:' + t.delay + 's' }, svg);
-        tx.textContent = t.text;
-      });
+      // Scene, drawn back to front
+      var podium = { x: 0, y: 0, z: 0, w: 14, d: 9.5, floors: 2, fh: 1.1, m: 1 };
+      var t1 = { x: 1, y: 1, z: 2.2, w: 4, d: 5.5, floors: 24 };
+      var bridge = { x: 5, y: 2.5, z: 2.2 + 16 * FH, w: 3, d: 2, floors: 2, m: .5 };
+      var t2 = { x: 8, y: .8, z: 2.2, w: 4.5, d: 4, floors: 31, fin: true };
+      var t3 = { x: 7.5, y: 6.2, z: 2.2, w: 5.5, d: 3, floors: 15, fin: true };
+      var pav = { x: 0, y: 11.5, z: 0, w: 5.5, d: 3.5, floors: 2, fh: 1.2, m: 1 };
+      var pav2 = { x: 7, y: 11.5, z: 0, w: 7.5, d: 3, floors: 4, m: .75, fin: true };
 
-      var pad = 18;
-      svg.setAttribute('viewBox', [minX - pad, minY - pad, (colX + 150) - minX + pad, maxY - minY + pad * 2]
+      var st = .045;
+      building(podium, .3, .15);
+      var e1 = building(t1, .6, st);
+      crown(t1.x, t1.y, t1.z + t1.floors * FH, t1.w, t1.d, 1.8, e1);
+      glare(t1.x, t1.y, t1.z, t1.w, t1.d, t1.floors * FH, e1 + .3);
+      building(bridge, .6 + 16 * st, .12);
+      var e2 = building(t2, .8, st);
+      crown(t2.x + .6, t2.y + .6, t2.z + t2.floors * FH, t2.w - 1.2, t2.d - 1.2, 2.4, e2);
+      var c2 = [t2.x + t2.w / 2, t2.y + t2.d / 2, t2.z + t2.floors * FH];
+      lines(seg(P(c2[0], c2[1], c2[2] + 2.4), P(c2[0], c2[1], c2[2] + 5.5)), 'crown', e2 + .6, .5);
+      glare(t2.x, t2.y, t2.z, t2.w, t2.d, t2.floors * FH, e2 + .3);
+      var e3 = building(t3, 1.1, st);
+      glare(t3.x, t3.y, t3.z, t3.w, t3.d, t3.floors * FH, e3 + .2);
+      building(pav, 1.0, .15);
+      building(pav2, 1.2, .12);
+
+      var pad = 12;
+      svg.setAttribute('viewBox', [minX - pad, minY - pad, maxX - minX + pad * 2, maxY - minY + pad * 2]
         .map(function (v) { return v.toFixed(1); }).join(' '));
     })();
   </script>
