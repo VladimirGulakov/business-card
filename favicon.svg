@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <circle cx="32" cy="32" r="31" fill="#FFFFF0" stroke="#d9d3c2" stroke-width="1"/>
+  <!-- V's right stroke runs tangent into the bowl of the G -->
+  <g transform="translate(32 32) scale(.78) translate(-31 -31)" fill="none" stroke="#111" stroke-width="6.5" stroke-linejoin="miter" stroke-miterlimit="10">
+    <path d="M7 14 L20 47 L26.7 27.7"/>
+    <path d="M48.96 23.64 A13 13 0 1 0 52 32 L41 32"/>
+  </g>
+</svg>
