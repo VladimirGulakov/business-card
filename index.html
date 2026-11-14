@@ -227,24 +227,35 @@
       overflow: visible;
     }
 
-    .ln {
-      fill: none;
-      stroke: var(--text);
-      stroke-linecap: round;
-      stroke-dasharray: 1;
-      stroke-dashoffset: 1;
-      animation: draw 1.2s ease-out forwards;
-    }
-    .gnd { stroke-width: .5; stroke-opacity: .16; }
-    .site { stroke-width: .7; stroke-opacity: .45; }
-    .crown { stroke-width: .8; }
-    .glare { stroke-width: .6; stroke-opacity: .28; }
-    .band { opacity: 0; animation: rise .32s ease-out forwards; }
-    .band .e { fill: none; stroke: var(--text); stroke-width: 1; }
-    .band .m { fill: none; stroke: var(--text); stroke-width: .45; stroke-opacity: .5; }
-    .band .fin { fill: none; stroke: var(--text); stroke-width: 1.1; stroke-opacity: .7; }
+    /* Elevation drawing animation */
+    #bld .ln { fill: none; stroke: var(--text); stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw 1s ease-out forwards; }
+    #bld .gx, #bld .gy { transform-box: fill-box; animation: 0.9s cubic-bezier(.3, .7, .2, 1) forwards; }
+    #bld .gx { transform-origin: left center; transform: scaleX(0); animation-name: growX; }
+    #bld .gy { transform-origin: center bottom; transform: scaleY(0); animation-name: growY; }
+    #bld .fd { opacity: 0; animation: fade .6s ease forwards; }
+    #bld .axis { stroke: var(--muted); stroke-width: .6; stroke-opacity: .55; stroke-dasharray: 16 3 2 3; fill: none; }
+    #bld .lvl { stroke: var(--muted); stroke-width: .5; stroke-opacity: .45; stroke-dasharray: 6 4; fill: none; }
+    #bld .dim { stroke: var(--muted); stroke-width: .6; fill: none; }
+    #bld .out { stroke-width: 1.3; }
+    #bld .fl { stroke: var(--text); stroke-width: .6; fill: none; }
+    #bld .sp { stroke: var(--text); stroke-width: .35; stroke-opacity: .55; fill: none; }
+    #bld .mu { stroke: var(--text); stroke-width: .35; stroke-opacity: .6; fill: none; }
+    #bld .fin { stroke: var(--text); stroke-width: .9; fill: none; }
+    #bld .lv { stroke: var(--text); stroke-width: .45; stroke-opacity: .7; fill: none; }
+    #bld .thin { stroke-width: .7; }
+    #bld .ref { stroke: var(--text); stroke-width: .5; stroke-opacity: .3; fill: none; }
+    #bld .glass { fill: var(--face-l); }
+    #bld .solid { fill: var(--face-top); }
+    #bld .ground { stroke: var(--text); stroke-width: 1.8; fill: none; }
+    #bld .hatch { stroke: var(--text); stroke-width: .4; stroke-opacity: .35; fill: none; }
+    #bld .bub { fill: var(--surface); stroke: var(--muted); stroke-width: .7; }
+    #bld .tri { fill: var(--muted); }
+    #bld text { font-family: var(--font); fill: var(--muted); font-size: 7.5px; }
+    #bld text.ax { font-size: 8px; fill: var(--text); text-anchor: middle; dominant-baseline: central; }
     @keyframes draw { to { stroke-dashoffset: 0; } }
-    @keyframes rise { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+    @keyframes fade { to { opacity: 1; } }
+    @keyframes growX { to { transform: scaleX(1); } }
+    @keyframes growY { to { transform: scaleY(1); } }
 
     /* Short desktop screens */
     @media (min-width: 981px) and (max-height: 800px) {
@@ -265,7 +276,21 @@
         grid-template-rows: auto auto auto;
         grid-template-areas: "top" "info" "art";
       }
-      .art { min-height: 0; height: 380px; }
+      /* Phone and tablet: the drawing animates as a fixed background */
+      .page > *:not(.art) { position: relative; z-index: 1; }
+      .art {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        min-height: 0;
+        background: none;
+        border: 0;
+        border-radius: 0;
+        opacity: .2;
+        pointer-events: none;
+      }
+      .art .cap { display: none; }
+      .art svg { inset: 64px 8px 12px; width: calc(100% - 16px); height: calc(100% - 76px); }
     }
     @media (max-width: 480px) {
       .top .loc span + span { display: none; }
@@ -276,12 +301,12 @@
       .areas li { font-size: 14px; padding: 12px; }
       .exp b { font-size: 34px; }
       .cta .btn { flex: 1 1 100%; justify-content: center; }
-      .art { height: 340px; border-radius: 16px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .ln { stroke-dasharray: none; animation: none; }
-      .band { opacity: 1; animation: none; }
+      #bld .ln { stroke-dasharray: none; animation: none; }
+      #bld .gx, #bld .gy { transform: none; animation: none; }
+      #bld .fd { opacity: 1; animation: none; }
     }
   </style>
 </head>
@@ -338,7 +363,7 @@
     <figure class="art" aria-hidden="true">
       <span class="cap tl">Жилой комплекс · high-tech</span>
       <span class="cap bl">Концепция</span>
-      <span class="cap br">Аксонометрия</span>
+      <span class="cap br">Фасад</span>
       <svg id="bld" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet"></svg>
     </figure>
   </div>
@@ -357,127 +382,166 @@
       if (img.complete && img.naturalWidth === 0) next();
     })();
 
-    // High-tech residential complex in axonometry. Towers grow floor by floor.
+    // Facade elevation of a high-tech residential complex, drawn as a construction
+    // sequence: axes -> levels -> ground -> outlines -> floors -> curtain wall -> details.
     (function () {
       var svg = document.getElementById('bld');
       var NS = 'http://www.w3.org/2000/svg';
-      var U = 10, K = Math.cos(Math.PI / 6), FH = .9; // floor height in plan units
-      var minX = 1e9, minY = 1e9, maxX = -1e9, maxY = -1e9;
-
-      function P(x, y, z) {
-        var p = [(x - y) * K * U, (x + y) * .5 * U - z * U];
-        if (p[0] < minX) minX = p[0]; if (p[0] > maxX) maxX = p[0];
-        if (p[1] < minY) minY = p[1]; if (p[1] > maxY) maxY = p[1];
-        return p;
-      }
-      function f(p) { return p[0].toFixed(1) + ' ' + p[1].toFixed(1); }
-      function poly(pts) { return 'M' + pts.map(f).join('L') + 'Z'; }
-      function seg(a, b) { return 'M' + f(a) + 'L' + f(b); }
+      var S = 4;                       // px per metre
+      function X(m) { return (m * S).toFixed(1); }
+      function Y(h) { return (-h * S).toFixed(1); }
+      function M(x, h) { return 'M' + X(x) + ' ' + Y(h); }
+      function L(x, h) { return 'L' + X(x) + ' ' + Y(h); }
+      function hl(x1, x2, h) { return M(x1, h) + L(x2, h); }
+      function vl(x, h1, h2) { return M(x, h1) + L(x, h2); }
+      function rect(x1, h1, x2, h2) { return M(x1, h1) + L(x2, h1) + L(x2, h2) + L(x1, h2) + 'Z'; }
       function el(tag, attrs, parent) {
         var e = document.createElementNS(NS, tag);
         for (var k in attrs) e.setAttribute(k, attrs[k]);
         (parent || svg).appendChild(e);
         return e;
       }
-      function lines(d, cls, delay, dur, parent) {
-        el('path', { d: d, 'class': 'ln ' + cls, pathLength: 1,
-          style: 'animation-delay:' + delay + 's;animation-duration:' + dur + 's' }, parent);
+      function p(d, cls, delay, dur) {
+        var a = { d: d, 'class': cls, style: 'animation-delay:' + delay.toFixed(2) + 's' + (dur ? ';animation-duration:' + dur + 's' : '') };
+        if (/\bln\b/.test(cls)) a.pathLength = 1;
+        return el('path', a);
+      }
+      function txt(x, h, s, cls, delay, anchor) {
+        var t = el('text', { x: X(x), y: Y(h), 'class': (cls || '') + ' fd', style: 'animation-delay:' + delay.toFixed(2) + 's' });
+        if (anchor) t.setAttribute('text-anchor', anchor);
+        t.textContent = s;
       }
 
-      // Site: faint grid, plot outline and paths
-      var g = '';
-      for (var i = -2; i <= 16; i += 2) g += seg(P(i, -2, 0), P(i, 17, 0));
-      for (var j = -2; j <= 17; j += 2) g += seg(P(-2, j, 0), P(16, j, 0));
-      lines(g, 'gnd', 0, 1);
-      lines(poly([P(-1, -1, 0), P(15, -1, 0), P(15, 16, 0), P(-1, 16, 0)]) +
-            seg(P(-1, 10.5, 0), P(15, 10.5, 0)) + seg(P(6, 10.5, 0), P(6, 16, 0)), 'site', .2, 1.2);
+      var FH = 3.3, POD = 7.2;
+      var A = { x1: 6, x2: 30, floors: 26 };          // tall tower
+      var B = { x1: 36, x2: 54, floors: 17 };         // mid tower
+      A.top = POD + A.floors * FH;                    // 93.0
+      B.top = POD + B.floors * FH;                    // 63.3
+      var WING = { x1: 66, x2: 84, levels: [0, 3.6, 6.9, 10.2, 13.5] };
+      var axes = [0, 6, 18, 30, 36, 54, 66, 84];
 
-      // A box drawn as a stack of floor bands that appear one after another.
-      // b.m: mullion step; b.fin: vertical fins on the left facade
-      function building(b, t0, step) {
-        var x = b.x, y = b.y, w = b.w, d = b.d, n = b.floors, fh = b.fh || FH;
-        for (var k = 0; k < n; k++) {
-          var z0 = b.z + k * fh, z1 = z0 + fh, last = k === n - 1;
-          var G = el('g', { 'class': 'band', style: 'animation-delay:' + (t0 + k * step).toFixed(2) + 's' });
-          var A = P(x, y, z1), B = P(x + w, y, z1), C = P(x + w, y + d, z1), D = P(x, y + d, z1);
-          var B0 = P(x + w, y, z0), C0 = P(x + w, y + d, z0), D0 = P(x, y + d, z0);
-          el('path', { d: poly([B, C, C0, B0]), fill: 'var(--face-r)' }, G);
-          el('path', { d: poly([D, C, C0, D0]), fill: 'var(--face-l)' }, G);
-          if (last) el('path', { d: poly([A, B, C, D]), fill: 'var(--face-top)' }, G);
+      // 1. Structural axes with marker bubbles
+      axes.forEach(function (x, i) {
+        var t = .05 + i * .07;
+        p(vl(x, -5.6, 108), 'axis gy', t, 1.1);
+        el('circle', { cx: X(x), cy: Y(-8.2), r: 2.4 * S, 'class': 'bub fd', style: 'animation-delay:' + (t + .5).toFixed(2) + 's' });
+        txt(x, -8.2, String(i + 1), 'ax', t + .6);
+      });
 
-          var m = '', fin = '';
-          var ms = b.m || .5;
-          for (var s = ms; s < d - 1e-6; s += ms) m += seg(P(x + w, y + s, z0), P(x + w, y + s, z1));
-          var idx = 0;
-          for (var s2 = ms; s2 < w - 1e-6; s2 += ms, idx++) {
-            if (b.fin && idx % 2 === 1) fin += seg(P(x + s2, y + d + .25, z0), P(x + s2, y + d + .25, z1));
-            else m += seg(P(x + s2, y + d, z0), P(x + s2, y + d, z1));
-          }
-          m += seg(B0, C0) + seg(C0, D0);
-          el('path', { d: m, 'class': 'm' }, G);
-          if (fin) el('path', { d: fin, 'class': 'fin' }, G);
+      // 2. Levels with elevation marks on the left
+      var levels = [[0, '±0.000'], [POD, '+7.200'], [13.5, '+13.500'], [B.top, '+63.300'], [A.top, '+93.000'], [A.top + 6, '+99.000']];
+      levels.forEach(function (lv, i) {
+        var t = .6 + i * .09, h = lv[0];
+        p(hl(-16, 88, h), 'lvl gx', t, 1);
+        p(M(-4, h) + 'l' + (-1.2 * S) + ' ' + (-1.8 * S) + 'h' + (2.4 * S) + 'z', 'tri fd', t + .5);
+        p(hl(-16, -2.6, h), 'dim fd', t + .5);
+        txt(-16, h + .9, lv[1], '', t + .6);
+      });
 
-          var e = seg(B, B0) + seg(C, C0) + seg(D, D0);
-          if (k === 0) e += seg(B0, C0) + seg(C0, D0);
-          if (last) e += seg(A, B) + seg(B, C) + seg(C, D) + seg(D, A);
-          el('path', { d: e, 'class': 'e' }, G);
+      // 3. Ground line and soil hatch
+      p(hl(-6, 96, 0), 'ground gx', 1.0, .8);
+      var hatch = '';
+      for (var hx = -5; hx < 96; hx += 2) hatch += M(hx, -.2) + 'l' + (-1.6 * S) + ' ' + (1.6 * S);
+      p(hatch, 'hatch fd', 1.5);
+
+      // 4. Volumes: opaque fills fade in, outlines are drawn
+      function volume(x1, h1, x2, h2, fill, t) {
+        p(rect(x1, h1, x2, h2), fill + ' fd', t + .3, .8);
+        p(rect(x1, h1, x2, h2), 'ln out', t, 1);
+      }
+      volume(0, 0, 66, POD, 'glass', 1.3);
+      volume(WING.x1, 0, WING.x2, 13.5, 'solid', 1.45);
+      volume(A.x1, POD, A.x2, A.top, 'glass', 1.5);
+      volume(B.x1, POD, B.x2, B.top, 'glass', 1.65);
+      var brH1 = POD + 9 * FH, brH2 = brH1 + 2 * FH;  // sky bridge, floors 10-11
+      volume(A.x2, brH1, B.x1, brH2, 'glass', 1.8);
+
+      // 5. Floors appear bottom-up
+      function floors(x1, x2, base, n, t0, step, skip) {
+        for (var k = 1; k < n; k++) {
+          var h = base + k * FH;
+          if (skip && skip(k)) continue;
+          p(hl(x1, x2, h), 'fl gx', t0 + k * step, .45);
+          p(hl(x1, x2, h - FH + .9), 'sp gx', t0 + k * step + .05, .45); // spandrel line
         }
-        return t0 + n * step;
+        p(hl(x1, x2, base + .9), 'sp gx', t0, .45);
+      }
+      var mech = function (k) { return k === 13; };   // technical floor band at 13-14
+      floors(A.x1, A.x2, POD, A.floors, 2.0, .045, mech);
+      floors(B.x1, B.x2, POD, B.floors, 2.15, .05);
+      WING.levels.slice(1, -1).forEach(function (h, i) { p(hl(WING.x1, WING.x2, h), 'fl gx', 2.0 + i * .1, .45); });
+      p(hl(0, 66, 3.6), 'fl gx', 1.9, .6);
+
+      // 6. Curtain wall: mullions grow up, fins, louvers
+      function mullions(x1, x2, h1, h2, step, finEvery, t) {
+        var mu = '', fin = '';
+        for (var x = x1 + step, i = 1; x < x2 - 1e-6; x += step, i++) {
+          if (finEvery && i % finEvery === 0) fin += vl(x, h1, h2);
+          else mu += vl(x, h1, h2);
+        }
+        if (mu) p(mu, 'mu gy', t, 1.2);
+        if (fin) p(fin, 'fin gy', t + .15, 1.2);
+      }
+      var mechH1 = POD + 13 * FH, mechH2 = mechH1 + FH;
+      mullions(A.x1, A.x2, POD, mechH1, 1.5, 4, 2.6);
+      mullions(A.x1, A.x2, mechH2, A.top, 1.5, 4, 2.75);
+      var lv = '';
+      for (var lh = mechH1 + .5; lh < mechH2; lh += .5) lv += hl(A.x1, A.x2, lh);
+      p(lv, 'lv gx', 2.9, .7);
+      p(hl(A.x1, A.x2, mechH1) + hl(A.x1, A.x2, mechH2), 'fl gx', 2.85, .6);
+
+      mullions(B.x1, B.x2, POD, B.top, 1.5, 4, 2.7);
+      var sh = '';
+      for (var k2 = 1; k2 <= B.floors; k2++) sh += hl(B.x1 - .7, B.x2 + .7, POD + k2 * FH - .45);
+      p(sh, 'lv gx', 3.0, .8);                         // sun-shading louvers on tower B
+
+      mullions(0, 66, 0, POD, 3, 0, 2.3);               // podium double-height glazing
+      for (var wk = 0; wk < 4; wk++) {                  // wing ribbon windows
+        var h0 = WING.levels[wk], h1 = WING.levels[wk + 1];
+        p(rect(WING.x1 + 1, h0 + .9, WING.x2 - 1, h1 - .6), 'ln mu', 2.4 + wk * .1, .7);
+        mullions(WING.x1 + 1, WING.x2 - 1, h0 + .9, h1 - .6, 2, 0, 2.5 + wk * .1);
       }
 
-      // Open steel crown on top of a tower: frame lines only
-      function crown(x, y, z, w, d, h, delay) {
-        var c = [[x, y], [x + w, y], [x + w, y + d], [x, y + d]];
-        var dd = '';
-        c.forEach(function (p, i) {
-          var q = c[(i + 1) % 4];
-          dd += seg(P(p[0], p[1], z + h), P(q[0], q[1], z + h));
-          dd += seg(P(p[0], p[1], z), P(p[0], p[1], z + h));
-        });
-        for (var s = 1; s < d; s += 1) dd += seg(P(x + w, y + s, z), P(x + w, y + s, z + h));
-        for (var s2 = 1; s2 < w; s2 += 1) dd += seg(P(x + s2, y + d, z), P(x + s2, y + d, z + h));
-        lines(dd, 'crown', delay, .9);
+      // 7. Details: bridge truss, crown, spire, canopy, reflections
+      var tr = hl(A.x2, B.x1, brH1 + FH) +
+        M(A.x2, brH1) + L(B.x1, brH1 + FH) + M(A.x2, brH1 + FH) + L(B.x1, brH1) +
+        M(A.x2, brH1 + FH) + L(B.x1, brH2) + M(A.x2, brH2) + L(B.x1, brH1 + FH);
+      p(tr, 'ln thin', 3.2, .8);
+
+      var cr = rect(A.x1 + 2, A.top, A.x2 - 2, A.top + 6);
+      for (var cx = A.x1 + 6; cx < A.x2 - 2; cx += 4) cr += vl(cx, A.top, A.top + 6);
+      cr += M(A.x1 + 2, A.top) + L(A.x1 + 6, A.top + 6) + M(A.x2 - 2, A.top) + L(A.x2 - 6, A.top + 6);
+      p(cr, 'ln thin', 3.3, 1);
+      var mid = (A.x1 + A.x2) / 2;
+      p(vl(mid, A.top + 6, A.top + 16) + vl(mid - .4, A.top + 6, A.top + 11) + vl(mid + .4, A.top + 6, A.top + 11), 'ln thin', 3.8, .6);
+      p(rect(B.x1 + 3, B.top, B.x2 - 3, B.top + 2.4), 'ln thin', 3.4, .6); // rooftop plant screen
+
+      p(rect(10, 4.3, 26, 4.8) + M(11, 4.8) + L(14, POD) + M(25, 4.8) + L(22, POD), 'ln thin', 3.1, .8); // canopy
+      p(rect(15, 0, 21, 3.6) + vl(18, 0, 3.6), 'ln thin', 3.2, .6);                                      // entrance doors
+
+      var rf = '';
+      [[A, .22], [A, .62], [B, .4]].forEach(function (r) {
+        var T = r[0], w = T.x2 - T.x1, h = POD + (T.top - POD) * r[1];
+        rf += M(T.x1 + w * .15, h) + L(T.x1 + w * .45, h + 9) + M(T.x1 + w * .3, h) + L(T.x1 + w * .6, h + 9);
+      });
+      p(rf, 'ln ref', 3.7, .8);
+
+      // Trees on the right for scale
+      var tree = '';
+      [[89, 6], [93.5, 4.6]].forEach(function (t) {
+        tree += vl(t[0], 0, t[1] - 2.2) + M(t[0] + 2.4, t[1]) + 'a' + 2.4 * S + ' ' + 2.4 * S + ' 0 1 0 ' + (-4.8 * S) + ' 0a' + 2.4 * S + ' ' + 2.4 * S + ' 0 1 0 ' + 4.8 * S + ' 0';
+      });
+      p(tree, 'ln thin', 3.5, .8);
+
+      // 8. Dimension chain between axes
+      var dm = hl(axes[0] - 1.5, axes[axes.length - 1] + 1.5, -3.6);
+      axes.forEach(function (x) { dm += M(x - .7, -4.3) + L(x + .7, -2.9) + vl(x, -2.6, -4.6); });
+      p(dm, 'dim gx', 3.4, .8);
+      for (var i = 0; i < axes.length - 1; i++) {
+        txt((axes[i] + axes[i + 1]) / 2, -3.0, String((axes[i + 1] - axes[i]) * 1000), '', 3.7, 'middle');
       }
 
-      // Diagonal reflections on the glass facade
-      function glare(x, y, z, w, d, h, delay) {
-        var dd = '';
-        [.25, .55].forEach(function (r) {
-          var zz = z + h * r;
-          dd += seg(P(x + w, y + d * .15, zz + h * .18), P(x + w, y + d * .65, zz - h * .02));
-          dd += seg(P(x + w, y + d * .25, zz + h * .2), P(x + w, y + d * .75, zz));
-        });
-        lines(dd, 'glare', delay, .8);
-      }
-
-      // Scene, drawn back to front
-      var podium = { x: 0, y: 0, z: 0, w: 14, d: 9.5, floors: 2, fh: 1.1, m: 1 };
-      var t1 = { x: 1, y: 1, z: 2.2, w: 4, d: 5.5, floors: 24 };
-      var bridge = { x: 5, y: 2.5, z: 2.2 + 16 * FH, w: 3, d: 2, floors: 2, m: .5 };
-      var t2 = { x: 8, y: .8, z: 2.2, w: 4.5, d: 4, floors: 31, fin: true };
-      var t3 = { x: 7.5, y: 6.2, z: 2.2, w: 5.5, d: 3, floors: 15, fin: true };
-      var pav = { x: 0, y: 11.5, z: 0, w: 5.5, d: 3.5, floors: 2, fh: 1.2, m: 1 };
-      var pav2 = { x: 7, y: 11.5, z: 0, w: 7.5, d: 3, floors: 4, m: .75, fin: true };
-
-      var st = .045;
-      building(podium, .3, .15);
-      var e1 = building(t1, .6, st);
-      crown(t1.x, t1.y, t1.z + t1.floors * FH, t1.w, t1.d, 1.8, e1);
-      glare(t1.x, t1.y, t1.z, t1.w, t1.d, t1.floors * FH, e1 + .3);
-      building(bridge, .6 + 16 * st, .12);
-      var e2 = building(t2, .8, st);
-      crown(t2.x + .6, t2.y + .6, t2.z + t2.floors * FH, t2.w - 1.2, t2.d - 1.2, 2.4, e2);
-      var c2 = [t2.x + t2.w / 2, t2.y + t2.d / 2, t2.z + t2.floors * FH];
-      lines(seg(P(c2[0], c2[1], c2[2] + 2.4), P(c2[0], c2[1], c2[2] + 5.5)), 'crown', e2 + .6, .5);
-      glare(t2.x, t2.y, t2.z, t2.w, t2.d, t2.floors * FH, e2 + .3);
-      var e3 = building(t3, 1.1, st);
-      glare(t3.x, t3.y, t3.z, t3.w, t3.d, t3.floors * FH, e3 + .2);
-      building(pav, 1.0, .15);
-      building(pav2, 1.2, .12);
-
-      var pad = 12;
-      svg.setAttribute('viewBox', [minX - pad, minY - pad, maxX - minX + pad * 2, maxY - minY + pad * 2]
-        .map(function (v) { return v.toFixed(1); }).join(' '));
+      svg.setAttribute('viewBox', [-22 * S, -112 * S, 120 * S, 124 * S].join(' '));
     })();
   </script>
 </body>
