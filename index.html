@@ -12,13 +12,18 @@
   <meta property="og:url" content="https://business-card-two-flax.vercel.app">
   <meta property="og:locale" content="ru_RU">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&subset=cyrillic&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #f4f1ec;
       --card: #ffffff;
       --text: #1d1d1f;
       --muted: #6b6b70;
+      --light-text: #5f5f64;
+      --fw-light: 300;
+      --fw-regular: 400;
+      --fw-medium: 500;
       --accent: #e8590c;
       --accent-soft: #fdf0e7;
       --border: #e6e1d8;
@@ -29,6 +34,7 @@
         --card: #1c1c1f;
         --text: #f2f2f3;
         --muted: #9a9aa2;
+        --light-text: #c2c2c9;
         --accent: #ff8a3d;
         --accent-soft: #2a211b;
         --border: #2c2c31;
@@ -43,7 +49,8 @@
       padding: 24px 16px;
       background: var(--bg);
       color: var(--text);
-      font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+      font-family: Roboto, system-ui, sans-serif;
+      font-weight: var(--fw-regular);
       line-height: 1.5;
       overflow-x: hidden;
     }
@@ -74,19 +81,19 @@
       display: none;
       place-items: center;
       color: #fff;
-      font-size: 44px; font-weight: 800;
+      font-size: 44px; font-weight: var(--fw-medium);
       letter-spacing: .02em;
     }
     .avatar.fallback img { display: none; }
     .avatar.fallback .initials { display: grid; }
-    h1 { font-size: 30px; font-weight: 800; letter-spacing: -.02em; line-height: 1.2; }
+    h1 { font-size: 30px; font-weight: var(--fw-medium); letter-spacing: -.02em; line-height: 1.2; }
     .role {
       margin-top: 6px;
-      font-size: 19px; font-weight: 600; line-height: 1.35;
+      font-size: 19px; font-weight: var(--fw-medium); line-height: 1.35;
       color: var(--accent);
     }
-    .role .city { color: var(--muted); font-weight: 500; white-space: nowrap; }
-    .about { margin: 14px 0 20px; color: var(--muted); font-size: 15px; }
+    .role .city { color: var(--light-text); font-weight: var(--fw-light); white-space: nowrap; }
+    .about { margin: 14px 0 20px; color: var(--muted); font-size: 15px; font-weight: var(--fw-regular); }
     .areas {
       list-style: none;
       display: grid;
@@ -98,11 +105,11 @@
       border-radius: 12px;
       background: var(--accent-soft);
       border: 1px solid var(--border);
-      font-size: 14px; font-weight: 600; line-height: 1.3;
+      font-size: 14px; font-weight: var(--fw-medium); line-height: 1.3;
       display: grid; place-items: center;
     }
     .exp { margin-top: 18px; font-size: 15px; }
-    .tools { margin-top: 4px; font-size: 13px; color: var(--muted); }
+    .tools { margin-top: 4px; font-size: 13px; color: var(--muted); font-weight: var(--fw-regular); }
     .contacts {
       margin-top: 20px;
       display: grid;
@@ -117,7 +124,7 @@
       border-radius: 12px;
       color: var(--text);
       text-decoration: none;
-      font-size: 14px; font-weight: 600;
+      font-size: 14px; font-weight: var(--fw-medium);
       transition: border-color .15s, color .15s, transform .15s;
     }
     .contacts a span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
